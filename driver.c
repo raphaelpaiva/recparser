@@ -15,7 +15,7 @@ static Exp *simple();
 
 static void match(int next) {
 	if(token != next) {
-		printf("missing token: %c\n", next);
+		printf("missing token: %c was %c\n", next, token);
 		exit(0);
 	}
 
@@ -78,6 +78,21 @@ static Exp *expr(int level) {
 	return exp1;
 }
 
+static ExpListNode *exprl() {
+        ExpListNode *root, *current;
+        
+        ALLOC(root, ExpListNode);
+        root->exp = expr(0);
+        root->next = NULL;
+        
+        while(token == ',') {
+                token = yylex();
+                root->next = exprl();
+        }
+        
+        return root;        
+}
+
 static Exp *simple() {
 	Exp *exp;
 
@@ -95,7 +110,7 @@ static Exp *simple() {
 			        ALLOC(exp, Exp);
 				exp->tag = EXP_FUNCALL;
 				exp->u.funcall.name = name;
-				exp->u.funcall.expl = NULL;
+				exp->u.funcall.expl = exprl();
 				exp->u.funcall.func = NULL;
 				match(')');
 			}
