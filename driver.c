@@ -89,12 +89,24 @@ static Exp *simple() {
 			ALLOCS(name, strlen(yyval.sval) + 1);
 			strcpy(name, yyval.sval);
 			token = yylex();
-
-			ALLOC(var, Var);
-			var->name = name;
-			ALLOC(exp, Exp);
-			exp->tag = EXP_VAR;
-			exp->u.var = var;
+			
+			if (token == '(') {
+			        token = yylex();
+			        ALLOC(exp, Exp);
+				exp->tag = EXP_FUNCALL;
+				exp->u.funcall.name = name;
+				exp->u.funcall.expl = NULL;
+				exp->u.funcall.func = NULL;
+				match(')');
+			}
+			else {
+			        ALLOC(var, Var);
+			        var->name = name;
+			        ALLOC(exp, Exp);
+			        exp->tag = EXP_VAR;
+			        exp->u.var = var;
+			}
+			
 			break;
 		}
 
