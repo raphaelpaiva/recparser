@@ -7,10 +7,10 @@ if (a == b[2][func(a[c + d])]) {}
 if (a >= b && b != a);
 if (a <= b);
 if (a != b || a > b && b == c);
-while (func() == a[]);
+while (func() == a[3]);
 return 1 > 2 + 3 < 3^-2+5;
 
 {funcao(a, 12);}
 
-{ uhuuul(); a = b  ;}
+{ uhuuul(); a = b; a = b[2]; b[2] = a;}
 

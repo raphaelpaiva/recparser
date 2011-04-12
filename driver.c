@@ -105,7 +105,7 @@ static ExpListNode *exprl(int starter, int separator, int finisher) {
                 if (starter && token != starter ) break;
                 if (starter) match(starter);
                 
-                root->next = exprl(separator, starter, finish);
+                root->next = exprl(separator, starter, finisher);
         }
         
         return root;        
@@ -262,17 +262,29 @@ static Command *command() {
 
 	 case TK_ID: {
 		 char *name;
+		 Var *var;
 		 ALLOCS(name, strlen(yyval.sval) + 1);
 		 strcpy(name, yyval.sval);
 		 
+		 ALLOC(var, Var);
+		 var->name = name;
+		 
 		 token = yylex();
+		 
+		 if (token == '[') {
+		        ExpListNode *idxs;
+	                
+	                token = yylex();
+	                idxs = exprl('[',']', ']');
+	                
+		        var->idxs = idxs;
+		 }
 
 		 if(token == '=') { /* Atribuição */
 			 token = yylex();
 
 			 this->tag = COMMAND_ATTR;
-			 ALLOC(this->u.attr.lvalue, Var);
-			 this->u.attr.lvalue->name = name;
+			 this->u.attr.lvalue = var;
 			 this->u.attr.rvalue = expr(0);
 			 match(';');
 		 } else if (token == '(') { /* Chamada de Função */
