@@ -24,10 +24,12 @@ static void match(int next) {
 
 struct { int left; int right; }
 pri[] = {
-	{3, 3}, /* + - */
-	{4, 4}, /* * / */
-	{2, 2}, /* == < > !  */
-	{5, 4}  /* ^ */
+	{4, 4}, /* + - */
+	{5, 5}, /* * / */
+	{3, 3}, /* == != < > <= >= ! */
+	{6, 5}, /* ^ */
+	{2, 2}, /* && */
+	{1, 1}, /* || */
 };
 
 #define NO_BINOP -1
@@ -38,10 +40,15 @@ static int binop(int token) {
 		case '-': 	return 0;
 		case '*': 	return 1;
 		case '/': 	return 1;
-		case '^':   return 3;
-		case TK_EQ: return 2;
-		case '<':   return 2;
-		case '>':   return 2;
+		case '^':       return 3;
+		case TK_EQ:     return 2;
+		case '<':       return 2;
+		case '>':       return 2;
+		case TK_LEQ:    return 2;
+		case TK_GEQ:    return 2;
+		case TK_NEQ:    return 2;
+		case TK_AND:    return 4;
+		case TK_OR:     return 5;
 		default:    return NO_BINOP;
 	}
 }

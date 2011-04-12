@@ -4,7 +4,9 @@
 if (-2 + 5 ) while(33 * 2 + a[2])  ; else ;
 if (33 - 44) if ( 90 / 12 + func(1,2, func2(a, b)) ) ; else ;
 if (a == b[2][func(a[c + d])]) {}
-
+if (a >= b && b != a);
+if (a <= b);
+if (a != b || a > b);
 return 1 > 2 + 3 < 3^-2+5;
 {}
 
