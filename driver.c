@@ -78,16 +78,20 @@ static Exp *expr(int level) {
 	return exp1;
 }
 
-static ExpListNode *exprl() {
-        ExpListNode *root, *current;
+static ExpListNode *exprl(int starter, int separator) {
+        ExpListNode *root;
         
         ALLOC(root, ExpListNode);
         root->exp = expr(0);
         root->next = NULL;
         
-        while(token == ',') {
+        while(token == separator) {
                 token = yylex();
-                root->next = exprl();
+                
+                if (starter && token != starter ) break;
+                if (starter) match(starter);
+                
+                root->next = exprl(separator, starter);
         }
         
         return root;        
@@ -110,9 +114,19 @@ static Exp *simple() {
 			        ALLOC(exp, Exp);
 				exp->tag = EXP_FUNCALL;
 				exp->u.funcall.name = name;
-				exp->u.funcall.expl = exprl();
+				exp->u.funcall.expl = exprl(0, ',');
 				exp->u.funcall.func = NULL;
 				match(')');
+			}
+		        else if(token == '[') {
+		                token = yylex();
+		                ALLOC(var, Var);
+		                var->name = name;
+			        var->idxs = exprl('[',']');
+			        ALLOC(exp, Exp);
+			        exp->tag = EXP_VAR;
+			        exp->u.var = var;
+			
 			}
 			else {
 			        ALLOC(var, Var);
@@ -155,7 +169,7 @@ static Exp *simple() {
 		}
 
 		default: {
-			printf("invalid expression, token: %i\n", token);
+			printf("invalid expression, token: %c\n", token);
 			exit(0);
 		}
 	}
