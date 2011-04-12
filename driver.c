@@ -13,6 +13,11 @@ static int token;
 static CommListNode *commandl();
 static Exp *simple();
 
+static int syntax_error(char *message) {
+        printf("Syntax error in line %i: %s\n", yylineno, message);
+        exit(0);
+}
+
 static void match(int next) {
 	if(token != next) {
 		printf("missing token: %c was %c\n", next, token);
@@ -85,8 +90,10 @@ static Exp *expr(int level) {
 	return exp1;
 }
 
-static ExpListNode *exprl(int starter, int separator) {
+static ExpListNode *exprl(int starter, int separator, int finish) {
         ExpListNode *root;
+        
+        if (token == finish) return NULL;
         
         ALLOC(root, ExpListNode);
         root->exp = expr(0);
@@ -98,7 +105,7 @@ static ExpListNode *exprl(int starter, int separator) {
                 if (starter && token != starter ) break;
                 if (starter) match(starter);
                 
-                root->next = exprl(separator, starter);
+                root->next = exprl(separator, starter, finish);
         }
         
         return root;        
@@ -121,15 +128,21 @@ static Exp *simple() {
 			        ALLOC(exp, Exp);
 				exp->tag = EXP_FUNCALL;
 				exp->u.funcall.name = name;
-				exp->u.funcall.expl = exprl(0, ',');
+				exp->u.funcall.expl = exprl(0, ',', ')');
 				exp->u.funcall.func = NULL;
 				match(')');
 			}
 		        else if(token == '[') {
+		                ExpListNode *idxs;
+		                
 		                token = yylex();
+		                idxs = exprl('[',']', ']');
+		                
+		                if (idxs == NULL) syntax_error("an array must have an index in expressions.");
+		                
 		                ALLOC(var, Var);
 		                var->name = name;
-			        var->idxs = exprl('[',']');
+			        var->idxs = idxs;
 			        ALLOC(exp, Exp);
 			        exp->tag = EXP_VAR;
 			        exp->u.var = var;
@@ -268,6 +281,8 @@ static Command *command() {
 			 ALLOC(this->u.funcall, Exp);
 			 this->u.funcall->tag = EXP_FUNCALL;
 			 this->u.funcall->u.funcall.name = name;
+			 this->u.funcall->u.funcall.expl = exprl(0, ',', ')');
+			 this->u.funcall->u.funcall.func = NULL;
 			 match(')'); match(';');
 		 } else {
 			 printf("invalid command, funcall or attr");
