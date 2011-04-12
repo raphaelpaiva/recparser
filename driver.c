@@ -90,10 +90,10 @@ static Exp *expr(int level) {
 	return exp1;
 }
 
-static ExpListNode *exprl(int starter, int separator, int finish) {
+static ExpListNode *exprl(int starter, int separator, int finisher) {
         ExpListNode *root;
         
-        if (token == finish) return NULL;
+        if (token == finisher) return NULL;
         
         ALLOC(root, ExpListNode);
         root->exp = expr(0);
