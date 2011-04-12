@@ -12,5 +12,5 @@ return 1 > 2 + 3 < 3^-2+5;
 
 {funcao(a, 12);}
 
-{ uhuuul(); a = b; a = b[2]; b[2] = a;}
+{ uhuuul(); a = b; a = b[2]; b[2] = a; a[2][func()] = c;}
 

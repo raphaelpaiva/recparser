@@ -111,19 +111,40 @@ static ExpListNode *exprl(int starter, int separator, int finisher) {
         return root;        
 }
 
+static Var *var(char *name) {
+        Var *var;
+        
+        ALLOC(var, Var);
+        var->name = name;
+        
+        if(token == '[') {
+                ExpListNode *idxs;
+                
+                token = yylex();
+                idxs = exprl('[',']', ']');
+                
+                if (idxs == NULL) syntax_error("an array must have an index.");
+                
+                var->name = name;
+	        var->idxs = idxs;
+	
+	}
+        
+        return var;
+}
+
 static Exp *simple() {
 	Exp *exp;
 
 	switch(token) {
 		case TK_ID: {
-			Var *var;
 			char *name;
 			
 			ALLOCS(name, strlen(yyval.sval) + 1);
 			strcpy(name, yyval.sval);
 			token = yylex();
 			
-			if (token == '(') {
+			if (token == '(') { /* Chamada de função*/
 			        token = yylex();
 			        ALLOC(exp, Exp);
 				exp->tag = EXP_FUNCALL;
@@ -132,29 +153,11 @@ static Exp *simple() {
 				exp->u.funcall.func = NULL;
 				match(')');
 			}
-		        else if(token == '[') {
-		                ExpListNode *idxs;
-		                
-		                token = yylex();
-		                idxs = exprl('[',']', ']');
-		                
-		                if (idxs == NULL) syntax_error("an array must have an index in expressions.");
-		                
-		                ALLOC(var, Var);
-		                var->name = name;
-			        var->idxs = idxs;
-			        ALLOC(exp, Exp);
-			        exp->tag = EXP_VAR;
-			        exp->u.var = var;
-			
-			}
-			else {
-			        ALLOC(var, Var);
-			        var->name = name;
-			        ALLOC(exp, Exp);
-			        exp->tag = EXP_VAR;
-			        exp->u.var = var;
-			}
+		        else { /* Var ou array */
+		                ALLOC(exp, Exp);
+	                        exp->tag = EXP_VAR;
+	                        exp->u.var = var(name);
+		        }
 			
 			break;
 		}
@@ -262,33 +265,16 @@ static Command *command() {
 
 	 case TK_ID: {
 		 char *name;
-		 Var *var;
+		 Var *cvar;
 		 ALLOCS(name, strlen(yyval.sval) + 1);
 		 strcpy(name, yyval.sval);
 		 
-		 ALLOC(var, Var);
-		 var->name = name;
-		 
 		 token = yylex();
 		 
-		 if (token == '[') {
-		        ExpListNode *idxs;
-	                
-	                token = yylex();
-	                idxs = exprl('[',']', ']');
-	                
-		        var->idxs = idxs;
-		 }
+		 cvar = var(name);
 
-		 if(token == '=') { /* Atribuição */
-			 token = yylex();
-
-			 this->tag = COMMAND_ATTR;
-			 this->u.attr.lvalue = var;
-			 this->u.attr.rvalue = expr(0);
-			 match(';');
-		 } else if (token == '(') { /* Chamada de Função */
-		 	 token = yylex();
+		 if (token == '(') { /* Chamada de Função */
+	        	 token = yylex();
 			 this->tag = COMMAND_FUNCALL;
 			 ALLOC(this->u.funcall, Exp);
 			 this->u.funcall->tag = EXP_FUNCALL;
@@ -296,6 +282,13 @@ static Command *command() {
 			 this->u.funcall->u.funcall.expl = exprl(0, ',', ')');
 			 this->u.funcall->u.funcall.func = NULL;
 			 match(')'); match(';');
+		 } else if(token == '=') { /* Atribuição */
+			 token = yylex();
+
+			 this->tag = COMMAND_ATTR;
+			 this->u.attr.lvalue = cvar;
+			 this->u.attr.rvalue = expr(0);
+			 match(';');
 		 } else {
 			 printf("invalid command, funcall or attr");
 			 exit(0);
