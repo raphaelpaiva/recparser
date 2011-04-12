@@ -133,6 +133,18 @@ static Var *var(char *name) {
         return var;
 }
 
+static Exp *funcall(char *name, Exp *exp) {
+        if (exp == NULL) ALLOC(exp, Exp);
+	
+	exp->tag = EXP_FUNCALL;
+        
+        exp->u.funcall.name = name;
+	exp->u.funcall.expl = exprl(0, ',', ')');
+	exp->u.funcall.func = NULL;
+	
+	return exp;
+}
+
 static Exp *simple() {
 	Exp *exp;
 
@@ -146,11 +158,7 @@ static Exp *simple() {
 			
 			if (token == '(') { /* Chamada de função*/
 			        token = yylex();
-			        ALLOC(exp, Exp);
-				exp->tag = EXP_FUNCALL;
-				exp->u.funcall.name = name;
-				exp->u.funcall.expl = exprl(0, ',', ')');
-				exp->u.funcall.func = NULL;
+				exp = funcall(name, NULL);
 				match(')');
 			}
 		        else { /* Var ou array */
@@ -275,12 +283,10 @@ static Command *command() {
 
 		 if (token == '(') { /* Chamada de Função */
 	        	 token = yylex();
+
 			 this->tag = COMMAND_FUNCALL;
-			 ALLOC(this->u.funcall, Exp);
-			 this->u.funcall->tag = EXP_FUNCALL;
-			 this->u.funcall->u.funcall.name = name;
-			 this->u.funcall->u.funcall.expl = exprl(0, ',', ')');
-			 this->u.funcall->u.funcall.func = NULL;
+			 this->u.funcall = funcall(name, this->u.funcall);
+			 
 			 match(')'); match(';');
 		 } else if(token == '=') { /* Atribuição */
 			 token = yylex();
@@ -288,6 +294,7 @@ static Command *command() {
 			 this->tag = COMMAND_ATTR;
 			 this->u.attr.lvalue = cvar;
 			 this->u.attr.rvalue = expr(0);
+
 			 match(';');
 		 } else {
 			 printf("invalid command, funcall or attr");
