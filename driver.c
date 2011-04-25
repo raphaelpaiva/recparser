@@ -12,6 +12,7 @@ static int token;
 
 static CommListNode *commandl();
 static Exp *simple();
+static Block *block();
 
 static int syntax_error(char *message) {
         printf("Syntax error in line %i: %s\n", yylineno, message);
@@ -208,10 +209,155 @@ static Exp *simple() {
 	return exp;
 }
 
+static int isTypeToken() {
+        return token == TK_TINT ||
+               token == TK_TFLOAT ||
+               token == TK_TCHAR;
+}
+
+static IntListNode *sizes() {
+        IntListNode *this;
+
+        if (token != '[') return NULL;
+
+        token = yylex();
+        
+        switch (token) {
+                case ']': {
+                        ALLOC(this, IntListNode);
+                        this->n = 0;
+                        break;
+                }
+                case TK_INT: {
+                        ALLOC(this, IntListNode);
+                        this->n = yyval.ival;
+                        match(']');
+                        break;
+                }
+                default: {
+                        syntax_error("invalid array size.");
+                }
+        }
+        
+        this->next = NULL;
+        
+        token = yylex();
+        
+        return this;
+}
+
+static Type *type() {
+        Type *this;
+        IntListNode *first, *curr, *prev;
+        
+        ALLOC(this, Type);
+        this->type = token;
+        this->line = yylineno;
+        
+        token = yylex();
+        
+        first = sizes();
+        prev = first;
+        
+        while (token == '[') {
+                curr = sizes();
+                prev->next = curr;
+                prev = curr;
+        }
+        
+        this->sizes = first;
+        
+        return this;
+}
+
+static Declr *declr_func(char *name) {
+        Declr *this;
+
+        ALLOC(this, Declr);
+        
+        this->tag = DECLR_FUNC;
+        ALLOCS(this->u.name, strlen(name) + 1);
+        strcpy(this->u.name, name);
+        match(')');
+        
+        switch(token) {
+                case ';': {
+                        token = yylex();
+                        this->u.func.block = NULL;
+                        break;
+                }
+                case '{': {
+                        token = yylex();
+                        this->u.func.block = block();
+                        break;
+                }
+                default: {
+                        syntax_error("invalid function declaration.");
+                        break;
+                }
+        }
+        
+        return this;
+
+}
+
+static Declr *declr(DeclrListNode *declrs, int from_block) {
+        Declr *this;
+        Type *declr_type;
+        char *name;
+        
+       declr_type = type();
+                
+       ALLOCS(name, strlen(yyval.sval) + 1);
+       strcpy(name, yyval.sval);
+               
+       token = yylex();
+       
+        switch (token) {
+                case '(': {
+                        if (from_block) {
+                                syntax_error("cannot declare functions inside blocks!");
+                        }
+                        token = yylex();
+                        this = declr_func(name);
+                        this->type = declr_type;
+                        break;
+                }
+                case ',': {
+                        this->tag = DECLR_VAR;
+                        break;
+                }
+                default: {
+                        syntax_error("invalid declaration.");
+                        break;
+                }
+        }        
+}
+
+static DeclrListNode *declrs(int from_block) {
+        DeclrListNode *this = NULL;
+        
+        if (!isTypeToken()) {
+                return NULL;
+        }
+        
+        ALLOC(this, DeclrListNode);
+        while (isTypeToken()) {
+                this->declr = declr(this, from_block);
+        }
+        
+        return this;
+}
+
 static Block* block() {
         Block *this;
         ALLOC(this, Block);
+        
+        this->declrs = declrs(1);
+        
         this->comms = commandl();
+        
+        match('}');
         
         return this;
 }
@@ -274,7 +420,6 @@ static Command *command() {
 		         this->u.block = block();
 		 }
 
-		 match('}');
 		 break;
 	 }
 
@@ -304,7 +449,7 @@ static Command *command() {
 
 			 match(';');
 		 } else {
-			 printf("invalid command, funcall or attr");
+			 printf("invalid command, funcall or attr\n");
 			 exit(0);
 		 }
 		 break;
@@ -321,17 +466,20 @@ static Command *command() {
 
 static CommListNode *commandl() {
   CommListNode *first, *curr;
-  if(token) {
-    ALLOC(first, CommListNode);
-    first->comm = command();
-    first->next = NULL;
-  }
+  
+  if (token == '}') return NULL;
+  
+  ALLOC(first, CommListNode);
+  first->comm = command();
+  first->next = NULL;
+  
   curr = first;
+  
   while(token && token != '}') {
     CommListNode *next;
     ALLOC(next, CommListNode);
-	next->comm = command();
-	next->next = NULL;
+    next->comm = command();
+    next->next = NULL;
     curr->next = next;
     curr = next;
   }
