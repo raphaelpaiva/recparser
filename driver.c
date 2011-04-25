@@ -208,6 +208,14 @@ static Exp *simple() {
 	return exp;
 }
 
+static Block* block() {
+        Block *this;
+        ALLOC(this, Block);
+        this->comms = commandl();
+        
+        return this;
+}
+
 static Command *command() {
   Command *this;
   ALLOC(this, Command);
@@ -261,10 +269,9 @@ static Command *command() {
 	 case '{': {
 		 token = yylex();
 		 this->tag = COMMAND_BLOCK;
-		
+		 
 		 if (token != '}') {
-			 ALLOC(this->u.block, Block);
-			 this->u.block->comms = commandl();
+		         this->u.block = block();
 		 }
 
 		 match('}');
