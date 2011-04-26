@@ -264,7 +264,7 @@ static Type *type() {
         return this;
 }
 
-static Declr *declr_func(char *name) {
+static Declr *declr_func(char *name, Type *type) {
         Declr *this;
 
         ALLOC(this, Declr);
@@ -291,11 +291,13 @@ static Declr *declr_func(char *name) {
                 }
         }
         
+        this->type = type;
+        
         return this;
 
 }
 
-static Declr *declr_var(char *name) {
+static Declr *declr_var(char *name, Type *type) {
         Declr *this;
 
         ALLOC(this, Declr);
@@ -303,6 +305,7 @@ static Declr *declr_var(char *name) {
         this->tag = DECLR_VAR;
         ALLOCS(this->u.name, strlen(name) + 1);
         strcpy(this->u.name, name);
+        this->type = type;
         match(';');
         
         return this;
@@ -327,17 +330,15 @@ static Declr *declr(DeclrListNode *declrs, int from_block) {
                                 syntax_error("cannot declare functions inside blocks!");
                         }
                         token = yylex();
-                        this = declr_func(name);
-                        this->type = declr_type;
+                        this = declr_func(name, declr_type);
                         break;
                 }
                 case ',': {
-                        /*TODO: Múltiplas declarações de variáveis*/
+//                        declr_multi_var(declrs, declr_type);
                         break;
                 }
                 case ';': {
-                        this = declr_var(name);
-                        this->type = declr_type;
+                        this = declr_var(name, declr_type);
                         break;
                 }
                 default: {
