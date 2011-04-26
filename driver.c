@@ -331,18 +331,23 @@ static Declr *declr_var(char *name, Type *type) {
         return this;
 }
 
-static Declr *declr(DeclrListNode *declrs, int from_block) {
-       Declr *this;
+static char *get_TK_ID_name() {
+        char *name;
+        match(TK_ID);
+                
+        ALLOCS(name, strlen(yyval.sval) + 1);
+        strcpy(name, yyval.sval);
+        
+        return name;
+}
+
+static Declr *declr(DeclrListNode *root, int from_block) {
        Type *declr_type;
        char *name;
         
        declr_type = type();
                 
-                
-       ALLOCS(name, strlen(yyval.sval) + 1);
-       strcpy(name, yyval.sval);
-       
-       token = yylex();
+       name = get_TK_ID_name();
        
         switch (token) {
                 case '(': {
@@ -350,15 +355,37 @@ static Declr *declr(DeclrListNode *declrs, int from_block) {
                                 syntax_error("cannot declare functions inside blocks!");
                         }
                         token = yylex();
-                        this = declr_func(name, declr_type);
+                        root->declr = declr_func(name, declr_type);
                         break;
                 }
                 case ',': {
-//                        declr_multi_var(declrs, declr_type, name);
+                        DeclrListNode *curr;
+                        root->declr = declr_var(name, declr_type);
+                        
+                        ALLOC(curr, DeclrListNode);
+                        curr = root;
+                        while(token == ',') {
+                                DeclrListNode *next;
+                                char *name;
+                                
+                                token = yylex();
+                                
+                                name = get_TK_ID_name();
+                                
+                                ALLOC(next, DeclrListNode);
+                                next->declr = declr_var(name, declr_type);
+                                next->next = NULL;
+                                
+                                curr->next = next;
+                                
+                                curr = next;
+                        }
+                        
+                        match(';');
                         break;
                 }
                 case ';': {
-                        this = declr_var(name, declr_type);
+                        root->declr = declr_var(name, declr_type);
                         match(';');
                         break;
                 }
@@ -368,9 +395,8 @@ static Declr *declr(DeclrListNode *declrs, int from_block) {
                 }
         }
         
-        return this;        
+        return root->declr;
 }
-
 static DeclrListNode *declrs(int from_block) {
         DeclrListNode *first, *curr;
 
@@ -380,22 +406,23 @@ static DeclrListNode *declrs(int from_block) {
 
         ALLOC(first, DeclrListNode);
         first->declr = declr(first, from_block);
-        first->next = NULL;
 
         ALLOC(curr, DeclrListNode);
-
+        
         curr = first;
+        
+        while(curr->next) curr = curr->next;
 
         while (is_type_token()) {
                 DeclrListNode *next;
                 
                 ALLOC(next, DeclrListNode);
                 
-                next->declr = declr(curr, from_block);
-                next->next = NULL;
+                next->declr = declr(next, from_block);
                 
                 curr->next = next;
                 curr = next;
+                while(curr->next) curr = curr->next;
         }
 
         return first;

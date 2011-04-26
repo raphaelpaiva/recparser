@@ -1,12 +1,14 @@
-int[10] a;
-char b;
+int a;
+
 float func() {
         int a;
         a = 10;
         return a; 
 }
 
-float c;
+int x,y,z;
+
 int[10][10] matrix;
 char[][10] bla;
 char[10][] ble;
+
