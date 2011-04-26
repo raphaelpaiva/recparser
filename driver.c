@@ -312,9 +312,9 @@ static Declr *declr_var(char *name, Type *type) {
 }
 
 static Declr *declr(DeclrListNode *declrs, int from_block) {
-        Declr *this;
-        Type *declr_type;
-        char *name;
+       Declr *this;
+       Type *declr_type;
+       char *name;
         
        declr_type = type();
                 
@@ -334,7 +334,7 @@ static Declr *declr(DeclrListNode *declrs, int from_block) {
                         break;
                 }
                 case ',': {
-//                        declr_multi_var(declrs, declr_type);
+//                        declr_multi_var(declrs, declr_type, name);
                         break;
                 }
                 case ';': {
@@ -345,12 +345,13 @@ static Declr *declr(DeclrListNode *declrs, int from_block) {
                         syntax_error("invalid declaration.");
                         break;
                 }
-        }        
+        }
+        
+        return this;        
 }
 
 static DeclrListNode *declrs(int from_block) {
-        DeclrListNode *first;
-        DeclrListNode *curr, *prev, *next;
+        DeclrListNode *first, *curr;
 
         if (!isTypeToken()) {
                 return NULL;
@@ -358,16 +359,18 @@ static DeclrListNode *declrs(int from_block) {
 
         ALLOC(first, DeclrListNode);
         first->declr = declr(first, from_block);
-
-        prev = first;
+        first->next = NULL;
 
         ALLOC(curr, DeclrListNode);
-        ALLOC(next, DeclrListNode);
-        
+
+        curr = first;
+
         while (isTypeToken()) {
-                curr->declr = declr(curr, from_block);
-                prev->next = curr;
-                prev = curr;
+                DeclrListNode *next;
+                ALLOC(next, DeclrListNode);
+                next->declr = declr(curr, from_block);
+                next->next = NULL;
+                curr->next = next;
                 curr = next;
         }
 

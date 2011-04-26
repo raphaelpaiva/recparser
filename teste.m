@@ -5,3 +5,7 @@ float func() {
         a = 10;
         return a; 
 }
+
+float c;
+
+char[5] d;
