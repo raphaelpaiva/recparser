@@ -212,14 +212,14 @@ static Exp *simple() {
 static int isTypeToken() {
         return token == TK_TINT ||
                token == TK_TFLOAT ||
-               token == TK_TCHAR;
+               token == TK_TCHAR ||
+               token == TK_TVOID;
 }
 
 static IntListNode *sizes() {
         IntListNode *this;
 
         if (token != '[') return NULL;
-
         token = yylex();
         
         switch (token) {
@@ -229,26 +229,26 @@ static IntListNode *sizes() {
                         break;
                 }
                 case TK_INT: {
+                        token = yylex();
                         ALLOC(this, IntListNode);
                         this->n = yyval.ival;
-                        match(']');
                         break;
                 }
                 default: {
                         syntax_error("invalid array size.");
+                        break;
                 }
         }
         
+        match(']');
         this->next = NULL;
-        
-        token = yylex();
         
         return this;
 }
 
 static Type *type() {
         Type *this;
-        IntListNode *first, *curr, *prev;
+        IntListNode *first;
         
         ALLOC(this, Type);
         this->type = token;
@@ -256,16 +256,7 @@ static Type *type() {
         
         token = yylex();
         
-        first = sizes();
-        prev = first;
-        
-        while (token == '[') {
-                curr = sizes();
-                prev->next = curr;
-                prev = curr;
-        }
-        
-        this->sizes = first;
+        this->sizes = sizes();
         
         return this;
 }
@@ -321,9 +312,10 @@ static Declr *declr(DeclrListNode *declrs, int from_block) {
         
        declr_type = type();
                 
+                
        ALLOCS(name, strlen(yyval.sval) + 1);
        strcpy(name, yyval.sval);
-               
+       
        token = yylex();
        
         switch (token) {
@@ -353,18 +345,29 @@ static Declr *declr(DeclrListNode *declrs, int from_block) {
 }
 
 static DeclrListNode *declrs(int from_block) {
-        DeclrListNode *this = NULL;
-        
+        DeclrListNode *first;
+        DeclrListNode *curr, *prev, *next;
+
         if (!isTypeToken()) {
                 return NULL;
         }
+
+        ALLOC(first, DeclrListNode);
+        first->declr = declr(first, from_block);
+
+        prev = first;
+
+        ALLOC(curr, DeclrListNode);
+        ALLOC(next, DeclrListNode);
         
-        ALLOC(this, DeclrListNode);
         while (isTypeToken()) {
-                this->declr = declr(this, from_block);
+                curr->declr = declr(curr, from_block);
+                prev->next = curr;
+                prev = curr;
+                curr = next;
         }
-        
-        return this;
+
+        return first;
 }
 
 static Block* block() {
@@ -506,7 +509,8 @@ static CommListNode *commandl() {
 
 int main(int argc, char **argv) {
   FILE *f;
-  CommListNode* commands;
+  //CommListNode* commands;
+  DeclrListNode *declr_list;
   if(argc > 1) {
     f = fopen(argv[1], "r");
     filename = argv[1];
@@ -523,6 +527,11 @@ int main(int argc, char **argv) {
   outfile = stdout;
   filename = "stdout";
   token = yylex();
-  commands = commandl();
-  print_commlist(0, commands);
+ /* commands = commandl();
+  print_commlist(0, commands);*/
+  
+  declr_list = declrs(0);
+  print_declrlist(0, declr_list);
+  
+  
 }
