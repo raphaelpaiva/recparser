@@ -1,14 +1,8 @@
-int a;
-
-float func() {
-        int a;
+float func(int x, float y, char z) {
+        int a,b,c;
         a = 10;
-        return a; 
+        b = 3;
+        c = a + b;
+        return c; 
 }
-
-int x,y,z;
-
-int[10][10] matrix;
-char[][10] bla;
-char[10][] ble;
 

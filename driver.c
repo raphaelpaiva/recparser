@@ -13,6 +13,8 @@ static int token;
 static CommListNode *commandl();
 static Exp *simple();
 static Block *block();
+static Declr *declr(DeclrListNode *root, int from_block, int from_function);
+static DeclrListNode *declrs(int from_block, int from_function);
 
 static int syntax_error(char *message) {
         printf("Syntax error in line %i: %s\n", yylineno, message);
@@ -289,7 +291,14 @@ static Declr *declr_func(char *name, Type *type) {
         this->tag = DECLR_FUNC;
         ALLOCS(this->u.name, strlen(name) + 1);
         strcpy(this->u.name, name);
-        match(')'); /* TODO: Funções com parâmetros */
+        
+        if (is_type_token()) {
+                ALLOC(this->u.func.params, DeclrListNode);
+                declr(this->u.func.params, 0, 1);
+                
+        } else {
+                match(')');
+        }
         
         switch(token) {
                 case ';': {
@@ -341,7 +350,7 @@ static char *get_TK_ID_name() {
         return name;
 }
 
-static Declr *declr(DeclrListNode *root, int from_block) {
+static Declr *declr(DeclrListNode *root, int from_block, int from_function) {
        Type *declr_type;
        char *name;
         
@@ -354,12 +363,18 @@ static Declr *declr(DeclrListNode *root, int from_block) {
                         if (from_block) {
                                 syntax_error("cannot declare functions inside blocks!");
                         }
+                        
+                        if (from_function) {
+                                syntax_error("cannot declare functions as function parameters!");
+                        }
+                        
                         token = yylex();
                         root->declr = declr_func(name, declr_type);
                         break;
                 }
                 case ',': {
                         DeclrListNode *curr;
+                        
                         root->declr = declr_var(name, declr_type);
                         
                         ALLOC(curr, DeclrListNode);
@@ -369,6 +384,10 @@ static Declr *declr(DeclrListNode *root, int from_block) {
                                 char *name;
                                 
                                 token = yylex();
+                                
+                                if (from_function) {
+                                        declr_type = type();
+                                }
                                 
                                 name = get_TK_ID_name();
                                 
@@ -381,9 +400,25 @@ static Declr *declr(DeclrListNode *root, int from_block) {
                                 curr = next;
                         }
                         
+                        if (from_function) {
+                                match(')');
+                                break;
+                        }
+                        
                         match(';');
                         break;
                 }
+                
+                case ')': {
+                        if (!from_function) {
+                                syntax_error("invalid declaration");
+                        }
+                        
+                        root->declr = declr_var(name, declr_type);
+                        match(')');
+                        break;
+                }
+                
                 case ';': {
                         root->declr = declr_var(name, declr_type);
                         match(';');
@@ -397,7 +432,7 @@ static Declr *declr(DeclrListNode *root, int from_block) {
         
         return root->declr;
 }
-static DeclrListNode *declrs(int from_block) {
+static DeclrListNode *declrs(int from_block, int from_function) {
         DeclrListNode *first, *curr;
 
         if (!is_type_token()) {
@@ -405,7 +440,7 @@ static DeclrListNode *declrs(int from_block) {
         }
 
         ALLOC(first, DeclrListNode);
-        first->declr = declr(first, from_block);
+        first->declr = declr(first, from_block, from_function);
 
         ALLOC(curr, DeclrListNode);
         
@@ -418,7 +453,7 @@ static DeclrListNode *declrs(int from_block) {
                 
                 ALLOC(next, DeclrListNode);
                 
-                next->declr = declr(next, from_block);
+                next->declr = declr(next, from_block, from_function);
                 
                 curr->next = next;
                 curr = next;
@@ -432,7 +467,7 @@ static Block* block() {
         Block *this;
         ALLOC(this, Block);
         
-        this->declrs = declrs(1);
+        this->declrs = declrs(1, 0);
         
         this->comms = commandl();
         
@@ -588,7 +623,7 @@ int main(int argc, char **argv) {
   filename = "stdout";
   token = yylex();
   
-  declr_list = declrs(0);
+  declr_list = declrs(0, 0);
   print_declrlist(0, declr_list);
   
   return 0;
