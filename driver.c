@@ -209,7 +209,7 @@ static Exp *simple() {
 	return exp;
 }
 
-static int isTypeToken() {
+static int is_type_token() {
         return token == TK_TINT ||
                token == TK_TFLOAT ||
                token == TK_TCHAR ||
@@ -244,7 +244,7 @@ static IntListNode *sizes(Type *type) {
         
         this->next = NULL;
         
-        type->dimensions = 1; /*TODO: arrays com várias dimensioes!*/
+        type->dimensions = 1;
         
         return this;
 }
@@ -272,7 +272,7 @@ static Declr *declr_func(char *name, Type *type) {
         this->tag = DECLR_FUNC;
         ALLOCS(this->u.name, strlen(name) + 1);
         strcpy(this->u.name, name);
-        match(')'); /*TODO: Funções com parâmetros*/
+        match(')'); /* TODO: Funções com parâmetros */
         
         switch(token) {
                 case ';': {
@@ -357,7 +357,7 @@ static Declr *declr(DeclrListNode *declrs, int from_block) {
 static DeclrListNode *declrs(int from_block) {
         DeclrListNode *first, *curr;
 
-        if (!isTypeToken()) {
+        if (!is_type_token()) {
                 return NULL;
         }
 
@@ -369,7 +369,7 @@ static DeclrListNode *declrs(int from_block) {
 
         curr = first;
 
-        while (isTypeToken()) {
+        while (is_type_token()) {
                 DeclrListNode *next;
                 ALLOC(next, DeclrListNode);
                 next->declr = declr(curr, from_block);
@@ -520,8 +520,8 @@ static CommListNode *commandl() {
 
 int main(int argc, char **argv) {
   FILE *f;
-  //CommListNode* commands;
   DeclrListNode *declr_list;
+ 
   if(argc > 1) {
     f = fopen(argv[1], "r");
     filename = argv[1];
@@ -529,17 +529,17 @@ int main(int argc, char **argv) {
     f = stdin;
     filename = "stdin";
   }
+ 
   if(!f) {
     fprintf(stderr, "Cannot open file %s. Exiting...", filename);
     exit(0);
   }
+ 
   yyrestart(f);
   yylineno = 1;
   outfile = stdout;
   filename = "stdout";
   token = yylex();
- /* commands = commandl();
-  print_commlist(0, commands);*/
   
   declr_list = declrs(0);
   print_declrlist(0, declr_list);
