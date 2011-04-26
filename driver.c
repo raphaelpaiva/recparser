@@ -216,7 +216,7 @@ static int isTypeToken() {
                token == TK_TVOID;
 }
 
-static IntListNode *sizes() {
+static IntListNode *sizes(Type *type) {
         IntListNode *this;
 
         if (token != '[') return NULL;
@@ -241,7 +241,10 @@ static IntListNode *sizes() {
         }
         
         match(']');
+        
         this->next = NULL;
+        
+        type->dimensions = 1; /*TODO: arrays com várias dimensioes!*/
         
         return this;
 }
@@ -256,7 +259,7 @@ static Type *type() {
         
         token = yylex();
         
-        this->sizes = sizes();
+        this->sizes = sizes(this);
         
         return this;
 }
