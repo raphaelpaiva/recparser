@@ -278,7 +278,7 @@ static Declr *declr_func(char *name) {
         this->tag = DECLR_FUNC;
         ALLOCS(this->u.name, strlen(name) + 1);
         strcpy(this->u.name, name);
-        match(')');
+        match(')'); /*TODO: Funções com parâmetros*/
         
         switch(token) {
                 case ';': {
@@ -299,6 +299,19 @@ static Declr *declr_func(char *name) {
         
         return this;
 
+}
+
+static Declr *declr_var(char *name) {
+        Declr *this;
+
+        ALLOC(this, Declr);
+        
+        this->tag = DECLR_VAR;
+        ALLOCS(this->u.name, strlen(name) + 1);
+        strcpy(this->u.name, name);
+        match(';');
+        
+        return this;
 }
 
 static Declr *declr(DeclrListNode *declrs, int from_block) {
@@ -324,7 +337,12 @@ static Declr *declr(DeclrListNode *declrs, int from_block) {
                         break;
                 }
                 case ',': {
-                        this->tag = DECLR_VAR;
+                        /*TODO: Múltiplas declarações de variáveis*/
+                        break;
+                }
+                case ';': {
+                        this = declr_var(name);
+                        this->type = declr_type;
                         break;
                 }
                 default: {

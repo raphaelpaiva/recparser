@@ -1,3 +1,3 @@
 {
-        int bla() { return ;}
+        int a;
 }
