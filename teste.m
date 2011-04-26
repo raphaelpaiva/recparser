@@ -7,4 +7,6 @@ float func() {
 }
 
 float c;
-
+int[10][10] matrix;
+char[][10] bla;
+char[10][] ble;

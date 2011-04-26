@@ -244,14 +244,14 @@ static IntListNode *sizes(Type *type) {
         
         this->next = NULL;
         
-        type->dimensions = 1;
+        type->dimensions++;
         
         return this;
 }
 
 static Type *type() {
         Type *this;
-        IntListNode *first;
+        IntListNode *first, *curr;
         
         ALLOC(this, Type);
         this->type = token;
@@ -259,7 +259,24 @@ static Type *type() {
         
         token = yylex();
         
-        this->sizes = sizes(this);
+        this->dimensions = 0;
+        
+        first = sizes(this);
+        
+        ALLOC(curr, IntListNode);
+        curr = first;
+        
+        while (token == '[') {
+                IntListNode *next;
+                ALLOC(next, IntListNode);
+                
+                next = sizes(this);
+                
+                curr->next = next;
+                curr = next;
+        }
+        
+        this->sizes = first;
         
         return this;
 }
@@ -310,7 +327,6 @@ static Declr *declr_var(char *name, Type *type) {
         ALLOCS(this->u.name, strlen(name) + 1);
         strcpy(this->u.name, name);
         this->type = type;
-        match(';');
         
         return this;
 }
@@ -343,6 +359,7 @@ static Declr *declr(DeclrListNode *declrs, int from_block) {
                 }
                 case ';': {
                         this = declr_var(name, declr_type);
+                        match(';');
                         break;
                 }
                 default: {
@@ -371,9 +388,12 @@ static DeclrListNode *declrs(int from_block) {
 
         while (is_type_token()) {
                 DeclrListNode *next;
+                
                 ALLOC(next, DeclrListNode);
+                
                 next->declr = declr(curr, from_block);
                 next->next = NULL;
+                
                 curr->next = next;
                 curr = next;
         }
@@ -544,5 +564,5 @@ int main(int argc, char **argv) {
   declr_list = declrs(0);
   print_declrlist(0, declr_list);
   
-  
+  return 0;
 }
