@@ -8,4 +8,3 @@ float func() {
 
 float c;
 
-char[5] d;

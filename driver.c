@@ -300,6 +300,10 @@ static Declr *declr_func(char *name, Type *type) {
 static Declr *declr_var(char *name, Type *type) {
         Declr *this;
 
+        if (type->type == TK_TVOID) {
+                syntax_error("Cannot declare a variable of void type");
+        }
+        
         ALLOC(this, Declr);
         
         this->tag = DECLR_VAR;
