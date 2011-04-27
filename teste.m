@@ -1,6 +1,6 @@
 /*comment*/
 
-int bla(int a, int b, ..., int c);
+int bla(int[] a, int b, ...);
 
 int global;
 

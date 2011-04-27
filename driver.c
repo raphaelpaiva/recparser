@@ -388,6 +388,10 @@ static Declr *declr(DeclrListNode *root, int from_block, int from_function) {
                                 DeclrListNode *next;
                                 char *name;
                                 
+                                if (declr_type->type == TK_MANY) {
+                                        SYNTAX_ERROR("varargs should be the last parameter of a function");
+                                }
+                                
                                 token = yylex();
                                 
                                 if (from_function) {

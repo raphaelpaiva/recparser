@@ -1,5 +1,3 @@
-/* Loops aninhados */
-
 int atoi(char[] s);
 void printf(char[] s, ...);
 
