@@ -4,6 +4,8 @@
 #include "decl.h"
 #include "ast.h"
 
+#define SYNTAX_ERROR(message, args...) printf("Sintax error in line %i: ", yylineno); printf(message, ## args); puts("\n"); exit(0);
+
 extern int yylineno;
 extern FILE *outfile;
 extern char *filename;
@@ -15,11 +17,6 @@ static Exp *simple();
 static Block *block();
 static Declr *declr(DeclrListNode *root, int from_block, int from_function);
 static DeclrListNode *declrs(int from_block, int from_function);
-
-static int syntax_error(char *message) {
-        printf("Syntax error in line %i: %s\n", yylineno, message);
-        exit(0);
-}
 
 static void match(int next) {
 	if(token != next) {
@@ -126,7 +123,7 @@ static Var *var(char *name) {
                 token = yylex();
                 idxs = exprl('[',']', ']');
                 
-                if (idxs == NULL) syntax_error("an array must have an index.");
+                if (idxs == NULL) SYNTAX_ERROR("an array must have an index.");
                 
                 var->name = name;
 	        var->idxs = idxs;
@@ -203,8 +200,7 @@ static Exp *simple() {
 		}
 
 		default: {
-			printf("invalid expression, token: %c\n", token);
-			exit(0);
+		        SYNTAX_ERROR("invalid expression, token: %c", token);
 		}
 	}
 
@@ -237,7 +233,7 @@ static IntListNode *sizes(Type *type) {
                         break;
                 }
                 default: {
-                        syntax_error("invalid array size.");
+                        SYNTAX_ERROR("invalid array size.");
                         break;
                 }
         }
@@ -312,7 +308,7 @@ static Declr *declr_func(char *name, Type *type) {
                         break;
                 }
                 default: {
-                        syntax_error("invalid function declaration.");
+                        SYNTAX_ERROR("invalid function declaration: %s", name);
                         break;
                 }
         }
@@ -327,7 +323,7 @@ static Declr *declr_var(char *name, Type *type) {
         Declr *this;
 
         if (type->type == TK_TVOID) {
-                syntax_error("Cannot declare a variable of void type");
+                SYNTAX_ERROR("Cannot declare a variable of void type: %s", name);
         }
         
         ALLOC(this, Declr);
@@ -361,11 +357,11 @@ static Declr *declr(DeclrListNode *root, int from_block, int from_function) {
         switch (token) {
                 case '(': {
                         if (from_block) {
-                                syntax_error("cannot declare functions inside blocks!");
+                                SYNTAX_ERROR("cannot declare functions inside blocks: %s", name);
                         }
                         
                         if (from_function) {
-                                syntax_error("cannot declare functions as function parameters!");
+                                SYNTAX_ERROR("cannot declare functions as function parameters: %s", name);
                         }
                         
                         token = yylex();
@@ -411,7 +407,7 @@ static Declr *declr(DeclrListNode *root, int from_block, int from_function) {
                 
                 case ')': {
                         if (!from_function) {
-                                syntax_error("invalid declaration");
+                                SYNTAX_ERROR("invalid declaration: %s", name);
                         }
                         
                         root->declr = declr_var(name, declr_type);
@@ -425,7 +421,7 @@ static Declr *declr(DeclrListNode *root, int from_block, int from_function) {
                         break;
                 }
                 default: {
-                        syntax_error("invalid declaration.");
+                        SYNTAX_ERROR("invalid declaration: %s", name);
                         break;
                 }
         }
@@ -459,7 +455,7 @@ static DeclrListNode *declrs(int from_block, int from_function) {
                 curr = next;
                 while(curr->next) curr = curr->next;
         }
-
+        
         return first;
 }
 
@@ -563,15 +559,13 @@ static Command *command() {
 
 			 match(';');
 		 } else {
-			 printf("invalid command, funcall or attr\n");
-			 exit(0);
+			 SYNTAX_ERROR("invalid command, funcall or attr: %s", name);
 		 }
 		 break;
 	 }
 
      default: {
-		 printf("invalid command in line %i, (token: %c)\n", yylineno, token);
-		 exit(0);
+		 SYNTAX_ERROR("invalid command, token: %c", token);
 	 }
   }
 
