@@ -287,8 +287,8 @@ static Declr *declr_func(char *name, Type *type) {
         this->tag = DECLR_FUNC;
         ALLOCS(this->u.name, strlen(name) + 1);
         strcpy(this->u.name, name);
-        
-        if (is_type_token()) {
+
+        if (is_type_token() || token == TK_MANY) {
                 ALLOC(this->u.func.params, DeclrListNode);
                 declr(this->u.func.params, 0, 1);
                 
@@ -326,6 +326,10 @@ static Declr *declr_var(char *name, Type *type) {
                 SYNTAX_ERROR("Cannot declare a variable of void type: %s", name);
         }
         
+        if (type->type == TK_MANY) {
+                return NULL;
+        }
+        
         ALLOC(this, Declr);
         
         this->tag = DECLR_VAR;
@@ -338,6 +342,7 @@ static Declr *declr_var(char *name, Type *type) {
 
 static char *get_TK_ID_name() {
         char *name;
+        
         match(TK_ID);
                 
         ALLOCS(name, strlen(yyval.sval) + 1);
@@ -349,12 +354,16 @@ static char *get_TK_ID_name() {
 static Declr *declr(DeclrListNode *root, int from_block, int from_function) {
        Type *declr_type;
        char *name;
-        
-       declr_type = type();
-                
-       name = get_TK_ID_name();
        
-        switch (token) {
+       declr_type = type();
+       
+       if (declr_type->type == TK_MANY) {
+                token = yylex();
+       } else {
+                name = get_TK_ID_name();
+       }
+       
+       switch (token) {
                 case '(': {
                         if (from_block) {
                                 SYNTAX_ERROR("cannot declare functions inside blocks: %s", name);
@@ -385,7 +394,9 @@ static Declr *declr(DeclrListNode *root, int from_block, int from_function) {
                                         declr_type = type();
                                 }
                                 
-                                name = get_TK_ID_name();
+                                if (declr_type->type != TK_MANY) {
+                                        name = get_TK_ID_name();
+                                }
                                 
                                 ALLOC(next, DeclrListNode);
                                 next->declr = declr_var(name, declr_type);
@@ -417,16 +428,19 @@ static Declr *declr(DeclrListNode *root, int from_block, int from_function) {
                 
                 case ';': {
                         root->declr = declr_var(name, declr_type);
-                        match(';');
+                        
+                        if (declr_type->type != TK_MANY) {
+                                match(';');
+                        }
                         break;
                 }
                 default: {
                         SYNTAX_ERROR("invalid declaration: %s", name);
                         break;
                 }
-        }
+       }
         
-        return root->declr;
+       return root->declr;
 }
 static DeclrListNode *declrs(int from_block, int from_function) {
         DeclrListNode *first, *curr;
