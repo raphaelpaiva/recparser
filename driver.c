@@ -3,6 +3,51 @@
 #include <string.h>
 #include "driver.h"
 
+void match(int next) {
+	if(token != next) {
+		printf("missing token: %c was %c\n", next, token);
+		exit(0);
+	}
+
+	token = yylex();
+}
+
+struct { int left; int right; }
+pri[] = {
+	{4, 4}, /* + - */
+	{5, 5}, /* * / */
+	{3, 3}, /* == != < > <= >= ! */
+	{6, 5}, /* ^ */
+	{2, 2}, /* && */
+	{1, 1}, /* || */
+};
+
+int binop(int token) {
+	switch(token) {
+		case '+': 	return 0;
+		case '-': 	return 0;
+		case '*': 	return 1;
+		case '/': 	return 1;
+		case '^':       return 3;
+		case TK_EQ:     return 2;
+		case '<':       return 2;
+		case '>':       return 2;
+		case TK_LEQ:    return 2;
+		case TK_GEQ:    return 2;
+		case TK_NEQ:    return 2;
+		case TK_AND:    return 4;
+		case TK_OR:     return 5;
+		default:    return NO_BINOP;
+	}
+}
+
+int unop(int token) {
+	switch(token) {
+		case '-': return 4;
+		case '!': return 2;
+	}
+}
+
 Exp *expr(int level) {
 	Exp *exp1 = simple();
 	
@@ -579,7 +624,7 @@ void startLex(FILE *f)
   filename = "stdout";
   token = yylex();
 }
-
+/*
 int main(int argc, char **argv) {
   FILE *f;
   DeclrListNode *declr_list;
@@ -592,4 +637,4 @@ int main(int argc, char **argv) {
   print_declrlist(0, declr_list);
   
   return 0;
-}
+}*/
