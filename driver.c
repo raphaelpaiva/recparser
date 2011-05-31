@@ -1,71 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "decl.h"
-#include "ast.h"
+#include "driver.h"
 
-#define SYNTAX_ERROR(message, args...) printf("Sintax error in line %i: ", yylineno); printf(message, ## args); puts("\n"); exit(0);
-
-extern int yylineno;
-extern FILE *outfile;
-extern char *filename;
-
-static int token;
-
-static CommListNode *commandl();
-static Exp *simple();
-static Block *block();
-static Declr *declr(DeclrListNode *root, int from_block, int from_function);
-static DeclrListNode *declrs(int from_block, int from_function);
-
-static void match(int next) {
-	if(token != next) {
-		printf("missing token: %c was %c\n", next, token);
-		exit(0);
-	}
-
-	token = yylex();
-}
-
-struct { int left; int right; }
-pri[] = {
-	{4, 4}, /* + - */
-	{5, 5}, /* * / */
-	{3, 3}, /* == != < > <= >= ! */
-	{6, 5}, /* ^ */
-	{2, 2}, /* && */
-	{1, 1}, /* || */
-};
-
-#define NO_BINOP -1
-
-static int binop(int token) {
-	switch(token) {
-		case '+': 	return 0;
-		case '-': 	return 0;
-		case '*': 	return 1;
-		case '/': 	return 1;
-		case '^':       return 3;
-		case TK_EQ:     return 2;
-		case '<':       return 2;
-		case '>':       return 2;
-		case TK_LEQ:    return 2;
-		case TK_GEQ:    return 2;
-		case TK_NEQ:    return 2;
-		case TK_AND:    return 4;
-		case TK_OR:     return 5;
-		default:    return NO_BINOP;
-	}
-}
-
-static int unop(int token) {
-	switch(token) {
-		case '-': return 4;
-		case '!': return 2;
-	}
-}
-
-static Exp *expr(int level) {
+Exp *expr(int level) {
 	Exp *exp1 = simple();
 	
 	int op = binop(token);
@@ -90,7 +28,7 @@ static Exp *expr(int level) {
 	return exp1;
 }
 
-static ExpListNode *exprl(int starter, int separator, int finisher) {
+ExpListNode *exprl(int starter, int separator, int finisher) {
         ExpListNode *root;
         
         if (token == finisher) return NULL;
@@ -111,7 +49,7 @@ static ExpListNode *exprl(int starter, int separator, int finisher) {
         return root;        
 }
 
-static Var *var(char *name) {
+Var *var(char *name) {
         Var *var;
         
         ALLOC(var, Var);
@@ -133,7 +71,7 @@ static Var *var(char *name) {
         return var;
 }
 
-static Exp *funcall(char *name, Exp *exp) {
+Exp *funcall(char *name, Exp *exp) {
         if (exp == NULL) ALLOC(exp, Exp);
 	
 	exp->tag = EXP_FUNCALL;
@@ -145,7 +83,7 @@ static Exp *funcall(char *name, Exp *exp) {
 	return exp;
 }
 
-static Exp *simple() {
+Exp *simple() {
 	Exp *exp;
 
 	switch(token) {
@@ -207,14 +145,14 @@ static Exp *simple() {
 	return exp;
 }
 
-static int is_type_token() {
+int is_type_token() {
         return token == TK_TINT ||
                token == TK_TFLOAT ||
                token == TK_TCHAR ||
                token == TK_TVOID;
 }
 
-static IntListNode *sizes(Type *type) {
+IntListNode *sizes(Type *type) {
         IntListNode *this;
 
         if (token != '[') return NULL;
@@ -247,7 +185,7 @@ static IntListNode *sizes(Type *type) {
         return this;
 }
 
-static Type *type() {
+Type *type() {
         Type *this;
         IntListNode *first, *curr;
         
@@ -279,7 +217,7 @@ static Type *type() {
         return this;
 }
 
-static Declr *declr_func(char *name, Type *type) {
+Declr *declr_func(char *name, Type *type) {
         Declr *this;
 
         ALLOC(this, Declr);
@@ -319,7 +257,7 @@ static Declr *declr_func(char *name, Type *type) {
 
 }
 
-static Declr *declr_var(char *name, Type *type) {
+Declr *declr_var(char *name, Type *type) {
         Declr *this;
 
         if (type->type == TK_TVOID) {
@@ -340,7 +278,7 @@ static Declr *declr_var(char *name, Type *type) {
         return this;
 }
 
-static char *get_TK_ID_name() {
+char *get_TK_ID_name() {
         char *name;
         
         match(TK_ID);
@@ -351,7 +289,7 @@ static char *get_TK_ID_name() {
         return name;
 }
 
-static Declr *declr(DeclrListNode *root, int from_block, int from_function) {
+Declr *declr(DeclrListNode *root, int from_block, int from_function) {
        Type *declr_type;
        char *name;
        
@@ -446,7 +384,8 @@ static Declr *declr(DeclrListNode *root, int from_block, int from_function) {
         
        return root->declr;
 }
-static DeclrListNode *declrs(int from_block, int from_function) {
+
+DeclrListNode *declrs(int from_block, int from_function) {
         DeclrListNode *first, *curr;
 
         if (!is_type_token()) {
@@ -477,7 +416,7 @@ static DeclrListNode *declrs(int from_block, int from_function) {
         return first;
 }
 
-static Block* block() {
+Block* block() {
         Block *this;
         ALLOC(this, Block);
         
@@ -490,7 +429,7 @@ static Block* block() {
         return this;
 }
 
-static Command *command() {
+Command *command() {
   Command *this;
   ALLOC(this, Command);
 
@@ -590,7 +529,7 @@ static Command *command() {
   return this;
 }
 
-static CommListNode *commandl() {
+CommListNode *commandl() {
   CommListNode *first, *curr;
   
   if (token == '}') return NULL;
@@ -612,10 +551,10 @@ static CommListNode *commandl() {
   return first;
 }
 
-int main(int argc, char **argv) {
+FILE *openFile(int argc, char **argv)
+{
   FILE *f;
-  DeclrListNode *declr_list;
- 
+  
   if(argc > 1) {
     f = fopen(argv[1], "r");
     filename = argv[1];
@@ -628,12 +567,26 @@ int main(int argc, char **argv) {
     fprintf(stderr, "Cannot open file %s. Exiting...", filename);
     exit(0);
   }
- 
+  
+  return f;
+}
+
+void startLex(FILE *f)
+{
   yyrestart(f);
   yylineno = 1;
   outfile = stdout;
   filename = "stdout";
   token = yylex();
+}
+
+int main(int argc, char **argv) {
+  FILE *f;
+  DeclrListNode *declr_list;
+  
+  f = openFile(argc, argv);
+  
+  startLex(f);
   
   declr_list = declrs(0, 0);
   print_declrlist(0, declr_list);
