@@ -624,6 +624,20 @@ void start_lex(FILE *f)
   filename = "stdout";
   token = yylex();
 }
+
+void startup(int argc, char **argv)
+{
+  FILE *f;
+  f = open_file(argc, argv);
+  start_lex(f);
+}
+
+DeclrListNode *read_ast(int argc, char **argv)
+{
+  startup(argc, argv);
+  return declrs(0, 0);
+}
+
 /*
 int main(int argc, char **argv) {
   FILE *f;
