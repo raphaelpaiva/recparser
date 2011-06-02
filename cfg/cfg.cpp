@@ -26,23 +26,34 @@ string BasicBlock::name()
 {
   stringstream ss;
   
-  ss << "B:" << index;
+  ss << "B" << index << ":";
+  
+  return ss.str();
+}
+
+string BasicBlock::str(int indent)
+{
+  stringstream ss;
+  string spaces;
+  
+  for (int i = 0; i < indent + 2; i++)
+  {
+    spaces += " ";
+  }
+  
+  ss << "  " << name() << endl;
+
+  for(vector<TACOperation>::iterator it = ops.begin(); it != ops.end(); ++it )
+  {
+    ss << spaces << *it << endl;
+  }
   
   return ss.str();
 }
 
 string BasicBlock::str()
 {
-  stringstream ss;
-
-  ss << name() << endl;
-
-  for(vector<TACOperation>::iterator it = ops.begin(); it != ops.end(); ++it )
-  {
-    ss << "  "<< *it << endl;
-  }
-  
-  return ss.str();
+  return str(0);
 }
 
 void BasicBlock::operator<<(TACOperation& op)
@@ -50,6 +61,24 @@ void BasicBlock::operator<<(TACOperation& op)
   ops.push_back(op);
 }
 
+void CFG::operator<<(BasicBlock& b)
+{
+  blocks.push_back(b);
+}
+
+string CFG::str()
+{
+  stringstream ss;
+  
+  ss << name << ":" << endl;
+  
+  for(vector<BasicBlock>::iterator it = blocks.begin(); it != blocks.end(); ++it )
+  {
+    ss << (*it).str(2) << endl;
+  }
+  
+  return ss.str();
+}
 
 // ostream operators
 ostream& operator<<(ostream& o, TACVar& v)
@@ -67,3 +96,7 @@ ostream& operator<<(ostream& o, BasicBlock& b)
   return o << b.str();
 }
 
+ostream& operator<<(ostream& o, CFG& c)
+{
+  return o << c.str();
+}

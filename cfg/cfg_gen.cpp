@@ -8,12 +8,40 @@ extern "C" {
 
 using namespace std;
 
+CFG cfg_gen(Declr *declr)
+{
+  CFG cfg(declr->u.name);
+  
+  return cfg;
+}
+
 int main(int argc, char **argv) {
-/*  DeclrListNode *declr_list;
+  DeclrListNode *declrs;
   
-  declr_list = read_ast(argc, argv);
-  print_declrlist(0, declr_list); */
+  vector<CFG> cfgs;
   
+  declrs = read_ast(argc, argv);
+  print_declrlist(0, declrs);
+
+  while(declrs != NULL)
+  {
+    if (declrs->declr->tag == DECLR_FUNC)
+    {
+      cfgs.push_back(cfg_gen(declrs->declr));
+    }
+    
+    declrs = declrs->next;
+  }
+  
+  for (vector<CFG>::iterator it = cfgs.begin(); it != cfgs.end(); ++it)
+  {
+    cout << *it << endl;
+  }
+
+  return 0;
+}
+
+/*  
   TACVar target("t");
   TACVar left("a");
   int op = '+';
@@ -25,8 +53,9 @@ int main(int argc, char **argv) {
   
   b << TACop;
   
-  cout << b << endl;
+  CFG c("main");
   
-  return 0;
-}
-
+  c << b;
+  
+  cout << c << endl;
+  */

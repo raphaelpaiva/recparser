@@ -48,6 +48,22 @@ class BasicBlock {
     void operator<<(TACOperation& b);
     
     string name();
+    string str(int);
+    string str();
+};
+
+class CFG {
+  public:
+    string name;
+    vector<BasicBlock> blocks;
+    
+    CFG() {};
+    CFG(string paramName) : name(paramName) {};
+    
+    void operator<<(BasicBlock& b);
+    
+    friend ostream& operator<<(ostream& o, CFG& c);
+    
     string str();
 };
 
