@@ -14,7 +14,8 @@ fi
 cd $OUTPUT_DIR
 
 gcc -c $DRIVER_DIR/ast_pretty_printer.c $DRIVER_DIR/lex.yy.c $DRIVER_DIR/driver.c -g
+g++ -c $CFG_DIR/cfg.cpp
 g++ -c $CFG_DIR/cfg_gen.cpp
-g++ ast_pretty_printer.o lex.yy.o driver.o cfg.o -o $BIN_DIR/cfg
+g++ $OUTPUT_DIR/*.o -o $BIN_DIR/cfg
 
 cd $CFG_DIR
