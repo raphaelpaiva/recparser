@@ -596,7 +596,7 @@ CommListNode *commandl() {
   return first;
 }
 
-FILE *openFile(int argc, char **argv)
+FILE *open_file(int argc, char **argv)
 {
   FILE *f;
   
@@ -616,7 +616,7 @@ FILE *openFile(int argc, char **argv)
   return f;
 }
 
-void startLex(FILE *f)
+void start_lex(FILE *f)
 {
   yyrestart(f);
   yylineno = 1;
