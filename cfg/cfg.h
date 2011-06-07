@@ -7,28 +7,58 @@
 
 using namespace std;
 
-class TACVar {
+class TACMember {
   public:
     string name;
-    int index;
   
-    TACVar() {};
-    TACVar(string paramName) : name(paramName), index(0) { };
+    TACMember() {};
+    TACMember(string paramName) : name(paramName) {};
     
-    friend ostream& operator<<(ostream& o, TACVar& v);
+    friend ostream& operator<<(ostream& o, TACMember& m);
+    
+    string str();
+};
+
+class TACVar : public TACMember {
+  public:
+    int index;
+    
+    TACVar(string paramName) :  TACMember(paramName), index(0) { };
+    
+    string str();
+};
+
+class TACLiteral : public TACMember {
+  public:
+    int value;
+    
+    TACLiteral() {};
+    
+    TACLiteral(int paramValue) : value(paramValue) {};
+    
+    string str();
+};
+
+class TACFuncall : public TACMember {
+  public:
+    vector<TACMember> params;
+  
+    TACFuncall() {};
+    TACFuncall(string paramName) : TACMember(paramName) {};
+    TACFuncall(string paramName, vector<TACMember> paramParams) : TACMember(paramName), params(paramParams) {};
     
     string str();
 };
 
 class TACOperation {
   public:
-    TACVar target;
-    TACVar left;
-    TACVar right;
+    TACMember target;
+    TACMember left;
+    TACMember right;
     int op;
     
     TACOperation() {};
-    TACOperation(TACVar paramTarget, TACVar paramLeft, int paramOp, TACVar paramRight) : target(paramTarget), left(paramLeft), right(paramRight), op(paramOp) {} ;
+    TACOperation(TACMember paramTarget, TACMember paramLeft, int paramOp, TACMember paramRight) : target(paramTarget), left(paramLeft), right(paramRight), op(paramOp) {} ;
     
     friend ostream& operator<<(ostream& o, TACOperation& op);
     
