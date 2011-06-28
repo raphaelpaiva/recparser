@@ -88,7 +88,7 @@ ExpListNode *exprl(int starter, int separator, int finisher) {
                 if (starter && token != starter ) break;
                 if (starter) match(starter);
                 
-                root->next = exprl(separator, starter, finisher);
+                root->next = exprl(starter, separator, finisher);
         }
         
         return root;        
