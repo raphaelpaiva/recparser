@@ -638,17 +638,15 @@ DeclrListNode *read_ast(int argc, char **argv)
   return declrs(0, 0);
 }
 
-/*
+
 int main(int argc, char **argv) {
   FILE *f;
   DeclrListNode *declr_list;
   
-  f = openFile(argc, argv);
-  
-  startLex(f);
+  startup(argc, argv);
   
   declr_list = declrs(0, 0);
   print_declrlist(0, declr_list);
   
   return 0;
-}*/
+}

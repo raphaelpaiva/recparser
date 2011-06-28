@@ -5,7 +5,7 @@
 #include "decl.h"
 #include "ast.h"
 
-#define SYNTAX_ERROR(message, args...) printf("Sintax error in line %i: ", yylineno); printf(message, ## args); puts("\n"); exit(0);
+#define SYNTAX_ERROR(message, args...) { printf("Sintax error in line %i: ", yylineno); printf(message, ## args); puts("\n"); exit(0); }
 #define NO_BINOP -1
 
 int yylex(void);
