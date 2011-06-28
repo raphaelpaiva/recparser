@@ -154,10 +154,10 @@ Exp *simple() {
 		}
 
 		case TK_INT: {
+			token = yylex();
 			ALLOC(exp, Exp);
 			exp->tag = EXP_INT;
 			exp->u.ival = yyval.ival;
-			token = yylex();
 			break;
 		}
 		
@@ -180,10 +180,19 @@ Exp *simple() {
 			ALLOC(exp, Exp);
 			exp->tag = EXP_LNEG;
 			exp->u.exp = expr(unop('!'));
+			break;
+		}
+		case TK_STRING: {
+			token = yylex();
+			ALLOC(exp, Exp);
+			exp->tag = EXP_STRING;
+			exp->u.sval = yyval.sval;
+			break;
 		}
 
 		default: {
 		        SYNTAX_ERROR("invalid expression, token: %c", token);
+		        break;
 		}
 	}
 

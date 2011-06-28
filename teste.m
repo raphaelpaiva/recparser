@@ -7,15 +7,15 @@ int global;
 int foo() { return 42; }
 
 void bar() {
-        int[2] a;
+        int[2][2][2] a;
         
-        a[0] = 0;
+        a[0][0][0] = 0;
         
         {
                 int b;
                 b = foo();
                 
-                a[1] = a[0] - b;
+                a[1][1][1] = a[0][0][0] - b;
         }
 }
 
