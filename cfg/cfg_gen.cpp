@@ -19,22 +19,21 @@ bool is_attr_command(Command *ast_command)
   return ast_command != NULL && ast_command->tag == COMMAND_ATTR;
 }
 
-TACMember gen_tac_member(Exp *ast_operation)
+TACMember* gen_tac_member(Exp *ast_operation)
 {
   switch (ast_operation->tag) {
     case EXP_INT: {
-      TACLiteral literal(ast_operation->u.ival);
-      cout << "literal: " << literal.str() << endl;
+      TACLiteral *literal = new TACLiteral(ast_operation->u.ival);
       return literal;
       break;
     }
     case EXP_VAR: {
-      TACVar var(ast_operation->u.var->name);
+      TACVar *var = new TACVar(ast_operation->u.var->name);
       return var;
       break;
     }
     case EXP_FUNCALL: {
-      TACFuncall funcall(ast_operation->u.funcall.name);
+      TACFuncall *funcall = new TACFuncall(ast_operation->u.funcall.name);
       return funcall;
       break;
     }
@@ -51,9 +50,9 @@ vector<TACOperation> gen_expression_operations(Exp *ast_expression)
   
   switch (ast_expression->tag) {
     case EXP_BINOP: {
-      TACMember target("t");
-      TACMember left = gen_tac_member(ast_expression->u.binop.e1);
-      TACMember right = gen_tac_member(ast_expression->u.binop.e2);
+      TACMember *target = new TACMember("t");
+      TACMember *left = gen_tac_member(ast_expression->u.binop.e1);
+      TACMember *right = gen_tac_member(ast_expression->u.binop.e2);
       int op = ast_expression->u.binop.op;
       
       TACOperation tac_operation(target, left, op, right);
@@ -129,7 +128,8 @@ CFG cfg_gen(Declr *ast_declr)
   return cfg;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   DeclrListNode *ast_declrs;
   
   vector<CFG> cfgs;

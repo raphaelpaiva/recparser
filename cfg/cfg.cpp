@@ -51,7 +51,7 @@ string TACOperation::str()
 {
   stringstream ss;
   
-  ss << target << " <- " << left << " " << (char) op << " " << right;
+  ss << *target << " <- " << *left << " " << (char) op << " " << *right;
   
   return ss.str();
 }

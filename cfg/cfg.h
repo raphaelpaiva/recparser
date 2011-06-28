@@ -16,7 +16,7 @@ class TACMember {
     
     friend ostream& operator<<(ostream& o, TACMember& m);
     
-    string str();
+    virtual string str();
 };
 
 class TACVar : public TACMember {
@@ -52,13 +52,13 @@ class TACFuncall : public TACMember {
 
 class TACOperation {
   public:
-    TACMember target;
-    TACMember left;
-    TACMember right;
+    TACMember *target;
+    TACMember *left;
+    TACMember *right;
     int op;
     
     TACOperation() {};
-    TACOperation(TACMember paramTarget, TACMember paramLeft, int paramOp, TACMember paramRight) : target(paramTarget), left(paramLeft), right(paramRight), op(paramOp) {} ;
+    TACOperation(TACMember *paramTarget, TACMember *paramLeft, int paramOp, TACMember *paramRight) : target(paramTarget), left(paramLeft), right(paramRight), op(paramOp) {} ;
     
     friend ostream& operator<<(ostream& o, TACOperation& op);
     

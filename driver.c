@@ -647,7 +647,7 @@ DeclrListNode *read_ast(int argc, char **argv)
   return declrs(0, 0);
 }
 
-
+/*
 int main(int argc, char **argv) {
   FILE *f;
   DeclrListNode *declr_list;
@@ -658,4 +658,4 @@ int main(int argc, char **argv) {
   print_declrlist(0, declr_list);
   
   return 0;
-}
+}*/
