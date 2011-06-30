@@ -155,21 +155,3 @@ int main(int argc, char **argv)
   return 0;
 }
 
-/*  
-  TACVar target("t");
-  TACVar left("a");
-  int op = '+';
-  TACVar right("b");
-  
-  TACOperation TACop(target, left, op, right);
-  
-  BasicBlock b;
-  
-  b << TACop;
-  
-  CFG c("main");
-  
-  c << b;
-  
-  cout << c << endl;
-  */
