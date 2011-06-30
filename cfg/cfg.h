@@ -51,16 +51,22 @@ class TACFuncall : public TACMember {
 };
 
 class TACOperation {
+	public:
+		virtual string str();
+		friend ostream& operator<<(ostream& o, TACOperation& op);
+};
+
+class TACAttr : public TACOperation {
   public:
     TACMember *target;
     TACMember *left;
     TACMember *right;
     int op;
     
-    TACOperation() {};
-    TACOperation(TACMember *paramTarget, TACMember *paramLeft, int paramOp, TACMember *paramRight) : target(paramTarget), left(paramLeft), right(paramRight), op(paramOp) {} ;
+    TACAttr() {};
+    TACAttr(TACMember *paramTarget, TACMember *paramLeft, int paramOp, TACMember *paramRight) : target(paramTarget), left(paramLeft), right(paramRight), op(paramOp) {} ;
     
-    friend ostream& operator<<(ostream& o, TACOperation& op);
+    friend ostream& operator<<(ostream& o, TACAttr& op);
     
     string str();
 };
@@ -70,12 +76,12 @@ static int last_index = 0;
 class BasicBlock {
   public:
     int index;
-    vector<TACOperation> ops;
+    vector<TACOperation *> ops;
     
     BasicBlock() : index(last_index) { last_index++; };
 
     friend ostream& operator<<(ostream& o, BasicBlock& b);
-    void operator<<(TACOperation& b);
+    void operator<<(TACOperation *op);
     
     string name();
     string str(int);

@@ -49,6 +49,11 @@ string TACFuncall::str()
 
 string TACOperation::str()
 {
+    return "Generic Operation";
+}
+
+string TACAttr::str()
+{
   stringstream ss;
   
   ss << *target << " <- " << *left << " " << (char) op << " " << *right;
@@ -77,9 +82,9 @@ string BasicBlock::str(int indent)
   
   ss << "  " << name() << endl;
 
-  for(vector<TACOperation>::iterator it = ops.begin(); it != ops.end(); ++it )
+  for(vector<TACOperation *>::iterator it = ops.begin(); it != ops.end(); ++it )
   {
-    ss << spaces << *it << endl;
+    ss << spaces << **it << endl;
   }
   
   return ss.str();
@@ -90,7 +95,7 @@ string BasicBlock::str()
   return str(0);
 }
 
-void BasicBlock::operator<<(TACOperation& op)
+void BasicBlock::operator<<(TACOperation *op)
 {
   ops.push_back(op);
 }
@@ -119,18 +124,13 @@ ostream& operator<<(ostream& o, TACMember& v)
 {
   return o << v.str();
 }
-/*
-ostream& operator<<(ostream& o, TACMember& v)
+
+ostream& operator<<(ostream& o, TACOperation& op)
 {
-  return o << v.str();
+  return o << op.str();
 }
 
-ostream& operator<<(ostream& o, TACMember& v)
-{
-  return o << v.str();
-}
-*/
-ostream& operator<<(ostream& o, TACOperation& op)
+ostream& operator<<(ostream& o, TACAttr& op)
 {
   return o << op.str();
 }

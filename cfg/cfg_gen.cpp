@@ -34,9 +34,9 @@ TACMember* gen_tac_member(Exp *ast_operation)
   }
 }
 
-vector<TACOperation> gen_expression_operations(Exp *ast_expression)
+vector<TACOperation *> gen_expression_operations(Exp *ast_expression)
 {
-  vector<TACOperation> ops;
+  vector<TACOperation *> ops;
   
   switch (ast_expression->tag) {
     case EXP_BINOP: {
@@ -45,7 +45,7 @@ vector<TACOperation> gen_expression_operations(Exp *ast_expression)
       TACMember *right = gen_tac_member(ast_expression->u.binop.e2);
       int op = ast_expression->u.binop.op;
       
-      TACOperation tac_operation(target, left, op, right);
+      TACAttr *tac_operation = new TACAttr(target, left, op, right);
       
       ops.push_back(tac_operation);
       
@@ -60,10 +60,10 @@ vector<TACOperation> gen_expression_operations(Exp *ast_expression)
   return ops;
 }
 
-vector<TACOperation> gen_tac_operations(CommListNode *ast_commands)
+vector<TACOperation *> gen_tac_operations(CommListNode *ast_commands)
 {
   Command *ast_command;
-  vector<TACOperation> ops;
+  vector<TACOperation *> ops;
   
   ast_command = ast_commands->comm;
   
@@ -71,7 +71,7 @@ vector<TACOperation> gen_tac_operations(CommListNode *ast_commands)
   {
     TACMember target(ast_command->u.attr.lvalue->name);
     
-    vector<TACOperation> exp_ops = gen_expression_operations(ast_command->u.attr.rvalue);
+    vector<TACOperation *> exp_ops = gen_expression_operations(ast_command->u.attr.rvalue);
     
     ops.insert(ops.end(), exp_ops.begin(), exp_ops.end());
     
@@ -104,6 +104,11 @@ vector<BasicBlock> gen_blocks(Block *ast_block)
         blocks.push_back(block);
         
         break;
+      }
+      
+      case COMMAND_RET: {
+        
+      	break;
       }
       
       default: {
