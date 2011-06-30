@@ -486,7 +486,9 @@ Block* block() {
 Command *command() {
   Command *this;
   ALLOC(this, Command);
-
+  
+  this->line = yylineno;
+  
   switch (token) {
 	 case TK_IF: {
 		 token = yylex();
