@@ -1,23 +1,13 @@
 #include <cstdlib>
 #include <iostream>
 #include "cfg.h"
+#include "ast_utils.h"
 
 extern "C" {
         #include "../driver.h"
 }
 
 using namespace std;
-
-void error(string message)
-{
-  cout << "ERROR! " << message << endl;
-  exit(0);
-}
-
-bool is_attr_command(Command *ast_command)
-{
-  return ast_command != NULL && ast_command->tag == COMMAND_ATTR;
-}
 
 TACMember* gen_tac_member(Exp *ast_operation)
 {
@@ -38,7 +28,7 @@ TACMember* gen_tac_member(Exp *ast_operation)
       break;
     }
     default: {
-      error("Tipo de membro de expressao não tratado!");
+      error("Unknown expression member type!");
       break;
     }
   }
@@ -62,7 +52,7 @@ vector<TACOperation> gen_expression_operations(Exp *ast_expression)
       break;
     }
     default: {
-      error("expressao de tipo não tratado.");
+      error("Unknown expression type");
       break;
     }
   }
@@ -104,13 +94,22 @@ vector<BasicBlock> gen_blocks(Block *ast_block)
     Command *ast_command;
     ast_command = ast_commands->comm;
     
-    if (ast_command->tag == COMMAND_ATTR)
+    switch(ast_command->tag)
     {
-      BasicBlock block;
+      case COMMAND_ATTR: {
+        BasicBlock block;
+
+        block.ops = gen_tac_operations(ast_commands);
+
+        blocks.push_back(block);
+        
+        break;
+      }
       
-      block.ops = gen_tac_operations(ast_commands);
-      
-      blocks.push_back(block);
+      default: {
+        error("Unhandled command type.", ast_command);
+        break;
+      }
     }
     
     ast_commands = ast_commands->next;
