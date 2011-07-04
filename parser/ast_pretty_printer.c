@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "decl.h"
-#include "ast.h"
+#include "../ast/ast.h"
 
 FILE* outfile;
 char *filename;

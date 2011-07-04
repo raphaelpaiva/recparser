@@ -1,6 +1,6 @@
-#ifndef CFG_H
+#ifndef _CFG_H
 
-#define CFG_H
+#define _CFG_H
 
 #include <string>
 #include <vector>

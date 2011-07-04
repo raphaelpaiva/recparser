@@ -1,11 +1,7 @@
 #include <cstdlib>
 #include <iostream>
-#include "cfg.h"
+#include "cfg_gen.h"
 #include "ast_utils.h"
-
-extern "C" {
-        #include "../driver.h"
-}
 
 using namespace std;
 
@@ -132,15 +128,10 @@ CFG cfg_gen(Declr *ast_declr)
   return cfg;
 }
 
-int main(int argc, char **argv)
+vector<CFG> gen_cfgs(DeclrListNode *ast_declrs)
 {
-  DeclrListNode *ast_declrs;
-  
   vector<CFG> cfgs;
 
-  ast_declrs = read_ast(argc, argv);
-  print_declrlist(0, ast_declrs);
-  
   while(ast_declrs != NULL)
   {
     if (ast_declrs->declr->tag == DECLR_FUNC)
@@ -152,11 +143,6 @@ int main(int argc, char **argv)
     ast_declrs = ast_declrs->next;
   }
   
-  for (vector<CFG>::iterator it = cfgs.begin(); it != cfgs.end(); ++it)
-  {
-    cout << *it << endl;
-  }
-
-  return 0;
+  return cfgs;
 }
 

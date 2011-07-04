@@ -1,9 +1,9 @@
-#ifndef DRIVER_H
+#ifndef _DRIVER_H
 
-#define DRIVER_H
+#define _DRIVER_H
 
 #include "decl.h"
-#include "ast.h"
+#include "../ast/ast.h"
 
 #define SYNTAX_ERROR(message, args...) { printf("Sintax error in line %i: ", yylineno); printf(message, ## args); puts("\n"); exit(0); }
 #define NO_BINOP -1
@@ -26,5 +26,6 @@ FILE *open_file(int, char **);
 void start_lex(FILE *);
 void startup(int , char **);
 DeclrListNode *read_ast(int argc, char **argv);
+
 
 #endif

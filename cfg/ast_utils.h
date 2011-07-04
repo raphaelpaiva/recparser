@@ -1,13 +1,13 @@
-#ifndef AST_UTILS_H
+#ifndef _AST_UTILS_H
 
-#define AST_UTILS_H
+#define _AST_UTILS_H
 
 #include <cstdlib>
 #include <sstream>
 #include <string>
 
 extern "C" {
-  #include "../ast.h"
+  #include "../ast/ast.h"
 }
 
 using namespace std;
