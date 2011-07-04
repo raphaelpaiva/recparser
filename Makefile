@@ -40,6 +40,7 @@ mongac: $(C_OBJ) $(CXX_OBJ) $(OUT)/mongac.o
 	$(CXX) -o $(BIN)/$@ $^ $(CXX_FLAGS)
 
 clean:
+	rm -f *~
 	rm -f $(PARSER_DIR)/*~
 	rm -f $(CFG_DIR)/*~
 	rm -f $(OUT)/*.o
