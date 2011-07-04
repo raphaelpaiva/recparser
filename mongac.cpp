@@ -5,6 +5,7 @@
 
 extern "C" {
         #include "parser/driver.h"
+        #include "parser/type_checker.h"
 }
 
 
@@ -17,6 +18,9 @@ int main(int argc, char **argv)
   vector<CFG> cfgs;
 
   ast = read_ast(argc, argv);
+
+  check_prog(ast);
+
   print_declrlist(0, ast);
   
   cfgs = gen_cfgs(ast);

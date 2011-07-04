@@ -5,7 +5,7 @@
 #include "symtab.h"
 #include "decl.h"
 
-void check_prog();
+void check_prog(DeclrListNode *ast);
 void check_declrlist(SymTab *st, DeclrListNode* dln);
 void check_declr(SymTab *st, Declr* d);
 void check_paramlist(SymTab *st, DeclrListNode* pln, int line);
