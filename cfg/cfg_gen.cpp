@@ -56,6 +56,18 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
       
       break;
     }
+    case EXP_FUNCALL: {
+      error("FUNCALL Expression Handling not implemented yet!");
+      break;
+    }
+    case EXP_CONV: {
+      error("CONV Expression Handling not implemented yet!");
+      break;
+    }
+    case EXP_NEG : {
+      error("NEG Expression Handling not implemented yet!");
+      break;
+    }
     case EXP_STRING: {
       error("String Expression Handling not implemented yet!");
       break;
