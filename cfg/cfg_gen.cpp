@@ -144,6 +144,7 @@ vector<CFG> gen_cfgs(DeclrListNode *ast_declrs)
     }
     
     ast_declrs = ast_declrs->next;
+    last_index = 0;
   }
   
   return cfgs;
