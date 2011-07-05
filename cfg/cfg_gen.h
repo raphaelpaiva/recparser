@@ -11,6 +11,8 @@ extern "C" {
 
 using namespace std;
 
+static int last_temp_index;
+
 TACMember* gen_tac_member(Exp *ast_operation);
 
 vector<TACOperation *> gen_expression_operations(Exp *ast_expression);

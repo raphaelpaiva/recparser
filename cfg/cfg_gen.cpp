@@ -45,7 +45,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
       
       if (target == NULL)
       {
-        target = new TACVar("t");
+        target = new TACVar("t", last_temp_index++);
       }
       
       TACOperation *operation = new TACAttr(target, left, op, right);
@@ -77,7 +77,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
       
       if (target == NULL)
       {
-        target = new TACVar("t");
+        target = new TACVar("t", last_temp_index++);
       }
       
       TACOperation *attr = new TACAttr(target, funcall);
@@ -87,19 +87,18 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
       return target;
       break;
     }
-    case EXP_CONV: {
-      error("CONV Expression Handling not implemented yet!");
-      break;
-    }
     case EXP_NEG : {
-      error("NEG Expression Handling not implemented yet!");
+      //TACMember *neg = gen_operations(ast_expression);
       break;
     }
     case EXP_STRING: {
       error("String Expression Handling not implemented yet!");
       break;
     }
-    
+    case EXP_CONV: {
+      error("CONV Expression Handling not implemented yet!");
+      break;
+    }
     default: {
       error("Unhandled expression type", ast_expression);
       break;

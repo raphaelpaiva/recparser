@@ -3,6 +3,7 @@
 #define _CFG_H
 
 #include <string>
+#include <sstream>
 #include <vector>
 
 using namespace std;
@@ -30,6 +31,7 @@ class TACVar : public TACMember {
     int index;
     
     TACVar(string paramName) :  TACMember(paramName), index(0) { };
+    TACVar(string paramName, int temp_index) :  index(0) { stringstream ss; ss << paramName << temp_index; name = ss.str(); };
     
     string str();
 };
