@@ -10,6 +10,6 @@ int main()
 	
 	b = 2 + bla(a, b);
 	
-	return a + b;
+	return -(a + b);
 }
 

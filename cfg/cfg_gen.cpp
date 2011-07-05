@@ -97,7 +97,20 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
       break;
     }
     case EXP_NEG : {
-//      TACMember *neg = gen_operations(NULL, ast_expression->u.exp, basic_block);
+      TACMember *neg = gen_operations(NULL, ast_expression->u.exp, basic_block);
+      
+      TACMember *zero = new TACLiteral(0);
+      
+      if (target == NULL)
+      {
+        target = gen_temp();
+      }
+      
+      TACOperation *attr = new TACAttr(target, zero, '-', neg);
+      
+      basic_block->ops.push_back(attr);
+      
+      return target;
       break;
     }
     case EXP_STRING: {
