@@ -7,6 +7,12 @@
 
 using namespace std;
 
+class TACOperation {
+	public:
+		virtual string str();
+		friend ostream& operator<<(ostream& o, TACOperation& op);
+};
+
 class TACMember {
   public:
     string name;
@@ -39,21 +45,15 @@ class TACLiteral : public TACMember {
     string str();
 };
 
-class TACFuncall : public TACMember {
+class TACFuncall : public TACMember, public TACOperation {
   public:
-    vector<TACMember> params;
+    vector<TACMember *> params;
   
     TACFuncall() {};
     TACFuncall(string paramName) : TACMember(paramName) {};
-    TACFuncall(string paramName, vector<TACMember> paramParams) : TACMember(paramName), params(paramParams) {};
+    TACFuncall(string paramName, vector<TACMember *> paramParams) : TACMember(paramName), params(paramParams) {};
     
     string str();
-};
-
-class TACOperation {
-	public:
-		virtual string str();
-		friend ostream& operator<<(ostream& o, TACOperation& op);
 };
 
 class TACReturn : public TACOperation {

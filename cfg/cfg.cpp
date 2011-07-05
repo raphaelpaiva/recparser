@@ -29,18 +29,24 @@ string TACLiteral::str()
 
 string TACFuncall::str()
 {
+  if (params.size() == 0)
+  {
+    return "()";
+  }
+  
   stringstream ss;
   
   ss << name << '(';
   
-  for (vector<TACMember>::iterator it = params.begin(); it != params.end(); ++it)
+  for (vector<TACMember *>::iterator it = params.begin(); it != params.end(); ++it)
   {
-    ss << (*it).str() << ", ";
+    ss << (*it)->str() << ", ";
   }
   
   string partial = ss.str();
   
-  partial = partial.substr(0, partial.length() - 1);
+
+  partial = partial.substr(0, partial.length() - 2);
   
   partial += ")";
   
