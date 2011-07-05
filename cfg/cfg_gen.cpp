@@ -7,6 +7,10 @@ using namespace std;
 
 TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic_block)
 {
+  if (ast_expression == NULL) {
+    return NULL;
+  }
+  
   switch(ast_expression->tag)
   {
     case EXP_INT: {
@@ -36,6 +40,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
     case EXP_BINOP: {
       TACMember *left = gen_operations(NULL, ast_expression->u.binop.e1, basic_block);
       TACMember *right = gen_operations(NULL, ast_expression->u.binop.e2, basic_block);
+      
       int op = ast_expression->u.binop.op;
       
       if (target == NULL)
@@ -63,6 +68,14 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
   }
 }
 
+TACOperation *gen_return_operation(Exp *ast_expression, BasicBlock *basic_block)
+{
+  TACMember *ret_value = gen_operations(NULL, ast_expression, basic_block);
+  TACOperation *ret = new TACReturn(ret_value);
+  
+  return ret;
+}
+
 vector<BasicBlock *> gen_commands(Block *ast_block)
 {
   vector<BasicBlock *> blocks;
@@ -75,20 +88,23 @@ vector<BasicBlock *> gen_commands(Block *ast_block)
     Command *ast_command;
     ast_command = ast_commands->comm;
     
+    BasicBlock *basic_block = new BasicBlock();
+    
     switch(ast_command->tag)
     {
       case COMMAND_ATTR: {
-        BasicBlock *basic_block = new BasicBlock();
-        
         TACVar *target = new TACVar(ast_command->u.attr.lvalue->name);
 
         gen_operations(target, ast_command->u.attr.rvalue, basic_block);
 
-        blocks.push_back(basic_block);
-        
         break;
       }
       case COMMAND_RET: {
+        TACOperation *ret;
+        
+        ret = gen_return_operation(ast_command->u.ret, basic_block);
+        
+        basic_block->ops.push_back(ret);
         
         break;
       }
@@ -97,6 +113,8 @@ vector<BasicBlock *> gen_commands(Block *ast_block)
         break;
       }
     }
+    
+    blocks.push_back(basic_block);
     
     ast_commands = ast_commands->next;
   }
