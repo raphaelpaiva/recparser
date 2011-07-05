@@ -65,7 +65,7 @@ class TACAttr : public TACOperation {
     
     TACAttr() {};
     TACAttr(TACMember *paramTarget, TACMember *paramLeft, int paramOp, TACMember *paramRight) : target(paramTarget), left(paramLeft), right(paramRight), op(paramOp) {} ;
-    
+    TACAttr(TACMember *paramTarget, TACMember *paramLeft) : target(paramTarget), left(paramLeft), op(0), right(NULL) {} ;
     friend ostream& operator<<(ostream& o, TACAttr& op);
     
     string str();
@@ -81,7 +81,6 @@ class BasicBlock {
     BasicBlock() : index(last_index) { last_index++; };
 
     friend ostream& operator<<(ostream& o, BasicBlock& b);
-    void operator<<(TACOperation *op);
     
     string name();
     string str(int);
@@ -91,12 +90,10 @@ class BasicBlock {
 class CFG {
   public:
     string name;
-    vector<BasicBlock> blocks;
+    vector<BasicBlock *> blocks;
     
     CFG() {};
     CFG(string paramName) : name(paramName) {};
-    
-    void operator<<(BasicBlock& b);
     
     friend ostream& operator<<(ostream& o, CFG& c);
     
