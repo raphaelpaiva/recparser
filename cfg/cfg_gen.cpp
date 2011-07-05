@@ -26,7 +26,11 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
       break;
     }
     case EXP_VAR: {
-      TACMember *var = new TACVar(ast_expression->u.var->name);
+      stringstream ss;
+      
+      ss << ast_expression->u.var->name << "_" << ast_expression->u.var->var;
+      
+      TACMember *var = new TACVar(ss.str());
       
       if (target != NULL)
       {
