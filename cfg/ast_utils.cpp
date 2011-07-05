@@ -119,7 +119,12 @@ ostream& operator<<(ostream& o, Exp& ast_expression)
 void error(string message, Exp *ast_expression)
 {
   cout << "ERROR: " <<  message << endl
-       << "Expression: " << *ast_expression << endl;
+       << "Expression: " << *ast_expression
+       << ">> ";
+       
+       print_exp(ast_expression);
+       
+  cout << endl;
   exit(1);
 }
 
