@@ -105,10 +105,33 @@ class CFG {
     
     CFG() {};
     CFG(string paramName) : name(paramName) {};
+    CFG(string paramName, vector<BasicBlock *> paramBlocks) : name(paramName), blocks(paramBlocks) {};
     
     friend ostream& operator<<(ostream& o, CFG& c);
     
     string str();
 };
+
+template<class T>
+class Global : public TACMember {
+  public:
+    T value;
+    
+    Global<T>() {};
+    Global<T>(string paramName, T paramValue) : TACMember(paramName), value(paramValue) {};
+    
+    string str();
+};
+
+class Prog {
+  public:
+    vector<CFG *> cfgs;
+    vector<TACMember *> globals;
+    
+    Prog() {};
+    
+    string str();
+};
+
 
 #endif

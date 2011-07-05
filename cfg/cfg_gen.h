@@ -11,19 +11,7 @@ extern "C" {
 
 using namespace std;
 
-static int last_temp_index;
-
-TACMember* gen_tac_member(Exp *ast_operation);
-
-vector<TACOperation *> gen_expression_operations(Exp *ast_expression);
-
-vector<TACOperation *> gen_tac_operations(CommListNode *ast_commands);
-
-vector<BasicBlock> gen_blocks(Block *ast_block);
-
-CFG cfg_gen(Declr *ast_declr);
-
-vector<CFG> gen_cfgs(DeclrListNode *ast_declrs);
+Prog gen_prog(DeclrListNode *ast_declrs);
 
 #endif
 

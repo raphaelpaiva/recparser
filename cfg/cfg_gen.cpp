@@ -5,6 +5,10 @@
 
 using namespace std;
 
+static int last_temp_index;
+
+Prog prog;
+
 TACVar *gen_temp()
 {
   return new TACVar("t", last_temp_index++);
@@ -182,31 +186,27 @@ vector<BasicBlock *> gen_commands(Block *ast_block)
   return blocks;
 }
 
-CFG gen_cfg(Declr *ast_declr)
+CFG *gen_cfg(Declr *ast_declr)
 {
-  CFG cfg(ast_declr->u.name);
+  vector<BasicBlock *> blocks = gen_commands(ast_declr->u.func.block);
   
-  cfg.blocks = gen_commands(ast_declr->u.func.block);
-  
-  return cfg;
+  return new CFG(ast_declr->u.name, blocks);
 }
 
-vector<CFG> gen_cfgs(DeclrListNode *ast_declrs)
+Prog gen_prog(DeclrListNode *ast_declrs)
 {
-  vector<CFG> cfgs;
-
   while(ast_declrs != NULL)
   {
     if (ast_declrs->declr->tag == DECLR_FUNC)
     {
-      CFG cfg = gen_cfg(ast_declrs->declr);
-      cfgs.push_back(cfg);
+      CFG *cfg = gen_cfg(ast_declrs->declr);
+      prog.cfgs.push_back(cfg);
     }
     
     ast_declrs = ast_declrs->next;
     last_index = 0;
   }
   
-  return cfgs;
+  return prog;
 }
 

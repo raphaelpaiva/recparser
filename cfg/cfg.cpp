@@ -134,6 +134,33 @@ string TACReturn::str()
   return ss.str();
 }
 
+template<class T>
+string Global<T>::str()
+{
+  stringstream ss;
+  
+  ss << name << value;
+  
+  return ss.str();
+}
+
+string Prog::str()
+{
+  stringstream ss;
+  
+  for (vector<TACMember *>::iterator it = globals.begin(); it != globals.end(); ++it)
+  {
+    ss << **it << endl;
+  }
+  
+  for (vector<CFG *>::iterator it = cfgs.begin(); it != cfgs.end(); ++it)
+  {
+    ss << **it << endl;
+  }
+  
+  return ss.str();
+}
+
 // ostream operators
 ostream& operator<<(ostream& o, TACMember& v)
 {
@@ -165,3 +192,7 @@ ostream& operator<<(ostream& o, TACReturn& ret)
   return o << ret.str();
 }
 
+ostream& operator<<(ostream& o, Prog& prog)
+{
+  return o << prog.str();
+}

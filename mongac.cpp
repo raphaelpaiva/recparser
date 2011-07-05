@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 {
   DeclrListNode *ast;
   
-  vector<CFG> cfgs;
+  vector<CFG *> cfgs;
 
   ast = read_ast(argc, argv);
 
@@ -23,13 +23,10 @@ int main(int argc, char **argv)
 
   print_declrlist(0, ast);
   
-  cfgs = gen_cfgs(ast);
+  Prog program = gen_prog(ast);
   
-  for (vector<CFG>::iterator it = cfgs.begin(); it != cfgs.end(); ++it)
-  {
-    cout << *it << endl;
-  }
-
+  cout << program.str(); //TODO: cout << program Y U NO WORK?
+  
   return 0;
 }
 
