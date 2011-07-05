@@ -114,6 +114,20 @@ string CFG::str()
   return ss.str();
 }
 
+string TACReturn::str()
+{
+  stringstream ss;
+  
+  ss << "ret ";
+  
+  if (value != NULL)
+  {
+    ss << *value;
+  }
+  
+  return ss.str();
+}
+
 // ostream operators
 ostream& operator<<(ostream& o, TACMember& v)
 {
@@ -139,3 +153,9 @@ ostream& operator<<(ostream& o, CFG& c)
 {
   return o << c.str();
 }
+
+ostream& operator<<(ostream& o, TACReturn& ret)
+{
+  return o << ret.str();
+}
+

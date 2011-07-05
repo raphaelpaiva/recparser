@@ -56,6 +56,15 @@ class TACOperation {
 		friend ostream& operator<<(ostream& o, TACOperation& op);
 };
 
+class TACReturn : public TACOperation {
+  public:
+    TACMember *value;
+
+    TACReturn() : value(NULL) {};
+    TACReturn(TACMember *paramValue) : value(paramValue) {};
+    string str();
+};
+
 class TACAttr : public TACOperation {
   public:
     TACMember *target;
