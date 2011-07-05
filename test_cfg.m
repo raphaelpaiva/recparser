@@ -1,11 +1,15 @@
+int bla(int p, int q)
+{
+  return 2 * p + q;
+}
+
 int main()
 {
 	int a; int b;
-	a = b + 1 + 2 + 25*a;
-	return a;
+	a = 1 + 2 + 25*a;
+	
+	b = 2 + bla(a, b);
+	
+	return a + b;
 }
 
-int bla()
-{
-  return;
-}

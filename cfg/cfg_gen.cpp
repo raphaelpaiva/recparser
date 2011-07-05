@@ -57,7 +57,34 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
       break;
     }
     case EXP_FUNCALL: {
-      error("FUNCALL Expression Handling not implemented yet!");
+      string name = ast_expression->u.funcall.name;
+      ExpListNode *ast_params = ast_expression->u.funcall.expl;
+
+      vector<TACMember *> params;
+
+      while (ast_params != NULL)
+      {
+        Exp *param_exp = ast_params->exp;
+        
+        TACMember *param = gen_operations(NULL, param_exp, basic_block);
+        
+        params.push_back(param);
+        
+        ast_params = ast_params->next;
+      }
+      
+      TACMember *funcall = new TACFuncall(name, params);
+      
+      if (target == NULL)
+      {
+        target = new TACVar("t");
+      }
+      
+      TACOperation *attr = new TACAttr(target, funcall);
+      
+      basic_block->ops.push_back(attr);
+      
+      return target;
       break;
     }
     case EXP_CONV: {
