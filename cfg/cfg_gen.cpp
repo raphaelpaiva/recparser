@@ -5,82 +5,67 @@
 
 using namespace std;
 
-TACMember* gen_tac_member(Exp *ast_operation)
+TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic_block)
 {
-  switch (ast_operation->tag) {
+  switch(ast_expression->tag)
+  {
     case EXP_INT: {
-      TACLiteral *literal = new TACLiteral(ast_operation->u.ival);
+      TACMember *literal = new TACLiteral(ast_expression->u.ival);
+      
+      if (target != NULL)
+      {
+        TACOperation *operation = new TACAttr(target, literal);
+        basic_block->ops.push_back(operation);
+      }
+      
       return literal;
       break;
     }
     case EXP_VAR: {
-      TACVar *var = new TACVar(ast_operation->u.var->name);
+      TACMember *var = new TACVar(ast_expression->u.var->name);
+      
+      if (target != NULL)
+      {
+        TACOperation *operation = new TACAttr(target, var);
+        basic_block->ops.push_back(operation);
+      }
+      
       return var;
       break;
     }
-    case EXP_FUNCALL: {
-      TACFuncall *funcall = new TACFuncall(ast_operation->u.funcall.name);
-      return funcall;
-      break;
-    }
-    default: {
-      error("Unknown expression member type!");
-      break;
-    }
-  }
-}
-
-vector<TACOperation *> gen_expression_operations(Exp *ast_expression)
-{
-  vector<TACOperation *> ops;
-  
-  switch (ast_expression->tag) {
     case EXP_BINOP: {
-      TACMember *target = new TACMember("t");
-      TACMember *left = gen_tac_member(ast_expression->u.binop.e1);
-      TACMember *right = gen_tac_member(ast_expression->u.binop.e2);
+      TACMember *left = gen_operations(NULL, ast_expression->u.binop.e1, basic_block);
+      TACMember *right = gen_operations(NULL, ast_expression->u.binop.e2, basic_block);
       int op = ast_expression->u.binop.op;
       
-      TACAttr *tac_operation = new TACAttr(target, left, op, right);
+      if (target == NULL)
+      {
+        target = new TACVar("t");
+      }
       
-      ops.push_back(tac_operation);
+      TACOperation *operation = new TACAttr(target, left, op, right);
+      
+      basic_block->ops.push_back(operation);
+      
+      return target;
       
       break;
     }
+    case EXP_STRING: {
+      error("String Expression Handling not implemented yet!");
+      break;
+    }
+    
     default: {
-      error("Unknown expression type");
+      error("Unhandled expression type", ast_expression);
       break;
     }
   }
-    
-  return ops;
 }
 
-vector<TACOperation *> gen_tac_operations(CommListNode *ast_commands)
+vector<BasicBlock *> gen_commands(Block *ast_block)
 {
-  Command *ast_command;
-  vector<TACOperation *> ops;
-  
-  ast_command = ast_commands->comm;
-  
-  while (ast_commands != NULL && is_attr_command(ast_command))
-  {
-    TACMember target(ast_command->u.attr.lvalue->name);
-    
-    vector<TACOperation *> exp_ops = gen_expression_operations(ast_command->u.attr.rvalue);
-    
-    ops.insert(ops.end(), exp_ops.begin(), exp_ops.end());
-    
-    ast_commands = ast_commands->next;
-    ast_command = ast_commands->comm;
-  }
-  
-  return ops;
-}
-
-vector<BasicBlock> gen_blocks(Block *ast_block)
-{
-  vector<BasicBlock> blocks;
+  vector<BasicBlock *> blocks;
   CommListNode *ast_commands;
   
   ast_commands = ast_block->comms;
@@ -93,20 +78,20 @@ vector<BasicBlock> gen_blocks(Block *ast_block)
     switch(ast_command->tag)
     {
       case COMMAND_ATTR: {
-        BasicBlock block;
+        BasicBlock *basic_block = new BasicBlock();
+        
+        TACVar *target = new TACVar(ast_command->u.attr.lvalue->name);
 
-        block.ops = gen_tac_operations(ast_commands);
+        gen_operations(target, ast_command->u.attr.rvalue, basic_block);
 
-        blocks.push_back(block);
+        blocks.push_back(basic_block);
         
         break;
       }
-      
       case COMMAND_RET: {
         
-      	break;
+        break;
       }
-      
       default: {
         error("Unhandled command type.", ast_command);
         break;
@@ -119,11 +104,11 @@ vector<BasicBlock> gen_blocks(Block *ast_block)
   return blocks;
 }
 
-CFG cfg_gen(Declr *ast_declr)
+CFG gen_cfg(Declr *ast_declr)
 {
   CFG cfg(ast_declr->u.name);
   
-  cfg.blocks = gen_blocks(ast_declr->u.func.block);
+  cfg.blocks = gen_commands(ast_declr->u.func.block);
   
   return cfg;
 }
@@ -136,7 +121,7 @@ vector<CFG> gen_cfgs(DeclrListNode *ast_declrs)
   {
     if (ast_declrs->declr->tag == DECLR_FUNC)
     {
-      CFG cfg = cfg_gen(ast_declrs->declr);
+      CFG cfg = gen_cfg(ast_declrs->declr);
       cfgs.push_back(cfg);
     }
     
