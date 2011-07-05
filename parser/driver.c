@@ -62,6 +62,7 @@ Exp *expr(int level) {
 		op = binop(token);
 
 		ALLOC(new, Exp);
+		new->line = yylineno;
 		new->tag = EXP_BINOP;
 		new->u.binop.op = top;
 		new->u.binop.e1 = exp1;
@@ -99,6 +100,7 @@ Var *var(char *name) {
         
         ALLOC(var, Var);
         var->name = name;
+        var->line = yylineno;
         
         if(token == '[') {
                 ExpListNode *idxs;
@@ -120,8 +122,8 @@ Exp *funcall(char *name, Exp *exp) {
         if (exp == NULL) ALLOC(exp, Exp);
 	
 	exp->tag = EXP_FUNCALL;
-        
-        exp->u.funcall.name = name;
+  exp->line = yylineno;      
+  exp->u.funcall.name = name;
 	exp->u.funcall.expl = exprl(0, ',', ')');
 	exp->u.funcall.func = NULL;
 	
@@ -140,15 +142,16 @@ Exp *simple() {
 			token = yylex();
 			
 			if (token == '(') { /* Chamada de função*/
-			        token = yylex();
+		    token = yylex();
 				exp = funcall(name, NULL);
 				match(')');
 			}
-		        else { /* Var ou array */
-		                ALLOC(exp, Exp);
-	                        exp->tag = EXP_VAR;
-	                        exp->u.var = var(name);
-		        }
+		  else { /* Var ou array */
+        ALLOC(exp, Exp);
+        exp->line = yylineno;
+        exp->tag = EXP_VAR;
+        exp->u.var = var(name);
+      }
 			
 			break;
 		}
@@ -156,6 +159,7 @@ Exp *simple() {
 		case TK_INT: {
 			token = yylex();
 			ALLOC(exp, Exp);
+			exp->line = yylineno;
 			exp->tag = EXP_INT;
 			exp->u.ival = yyval.ival;
 			break;
@@ -171,6 +175,7 @@ Exp *simple() {
 		case '-': {
 			token = yylex();
 			ALLOC(exp, Exp);
+			exp->line = yylineno;
 			exp->tag = EXP_NEG;
 			exp->u.exp = expr(unop('-'));
 			break;
@@ -178,6 +183,7 @@ Exp *simple() {
 		case '!': {
 			token = yylex();
 			ALLOC(exp, Exp);
+			exp->line = yylineno;
 			exp->tag = EXP_LNEG;
 			exp->u.exp = expr(unop('!'));
 			break;
@@ -185,6 +191,7 @@ Exp *simple() {
 		case TK_STRING: {
 			token = yylex();
 			ALLOC(exp, Exp);
+			exp->line = yylineno;
 			exp->tag = EXP_STRING;
 			exp->u.sval = yyval.sval;
 			break;
@@ -277,6 +284,7 @@ Declr *declr_func(char *name, Type *type) {
         ALLOC(this, Declr);
         
         this->tag = DECLR_FUNC;
+        this->line = yylineno;
         ALLOCS(this->u.name, strlen(name) + 1);
         strcpy(this->u.name, name);
 
@@ -325,6 +333,7 @@ Declr *declr_var(char *name, Type *type) {
         ALLOC(this, Declr);
         
         this->tag = DECLR_VAR;
+        this->line = yylineno;
         ALLOCS(this->u.name, strlen(name) + 1);
         strcpy(this->u.name, name);
         this->type = type;
