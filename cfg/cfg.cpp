@@ -56,7 +56,12 @@ string TACAttr::str()
 {
   stringstream ss;
   
-  ss << *target << " <- " << *left << " " << (char) op << " " << *right;
+  ss << *target << " <- " << *left;
+  
+  if (op != 0)
+  {
+    ss << " " << (char) op << " " << *right;
+  }
   
   return ss.str();
 }
@@ -95,25 +100,15 @@ string BasicBlock::str()
   return str(0);
 }
 
-void BasicBlock::operator<<(TACOperation *op)
-{
-  ops.push_back(op);
-}
-
-void CFG::operator<<(BasicBlock& b)
-{
-  blocks.push_back(b);
-}
-
 string CFG::str()
 {
   stringstream ss;
   
   ss << name << ":" << endl;
   
-  for(vector<BasicBlock>::iterator it = blocks.begin(); it != blocks.end(); ++it )
+  for(vector<BasicBlock *>::iterator it = blocks.begin(); it != blocks.end(); ++it )
   {
-    ss << (*it).str(2) << endl;
+    ss << (*it)->str(2) << endl;
   }
   
   return ss.str();
