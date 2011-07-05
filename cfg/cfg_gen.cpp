@@ -5,6 +5,11 @@
 
 using namespace std;
 
+TACVar *gen_temp()
+{
+  return new TACVar("t", last_temp_index++);
+}
+
 TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic_block)
 {
   if (ast_expression == NULL) {
@@ -49,7 +54,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
       
       if (target == NULL)
       {
-        target = new TACVar("t", last_temp_index++);
+        target = gen_temp();
       }
       
       TACOperation *operation = new TACAttr(target, left, op, right);
@@ -81,7 +86,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
       
       if (target == NULL)
       {
-        target = new TACVar("t", last_temp_index++);
+        target = gen_temp();
       }
       
       TACOperation *attr = new TACAttr(target, funcall);
@@ -92,7 +97,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
       break;
     }
     case EXP_NEG : {
-      //TACMember *neg = gen_operations(ast_expression);
+//      TACMember *neg = gen_operations(NULL, ast_expression->u.exp, basic_block);
       break;
     }
     case EXP_STRING: {
