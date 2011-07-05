@@ -5,17 +5,18 @@ CXX=g++
 CXX_FLAGS=-Iinclude/ -ggdb
 
 DEPS = parser/lex.yy.c
+
 OUT = out
 BIN = bin
+
+PARSER_DIR = parser
+CFG_DIR = cfg
 
 _C_OBJ = ast_pretty_printer.o driver.o  lex.yy.o symtab.o type_checker.o
 C_OBJ = $(patsubst %,$(OUT)/%,$(_C_OBJ))
 
 _CXX_OBJ = cfg.o cfg_gen.o ast_utils.o
 CXX_OBJ = $(patsubst %,$(OUT)/%,$(_CXX_OBJ))
-
-PARSER_DIR = parser
-CFG_DIR = cfg
 
 all: prepare mongac
 
@@ -44,6 +45,7 @@ clean:
 	rm -f $(PARSER_DIR)/*~
 	rm -f $(CFG_DIR)/*~
 	rm -f $(OUT)/*.o
+	rm -f $(BIN)/*
 	rm -f mongac
 
 prepare:
