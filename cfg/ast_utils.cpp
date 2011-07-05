@@ -111,15 +111,15 @@ void error(string message, Command *ast_command)
   exit(1);
 }
 
-ostream& operator<<(ostream& o, Exp& ast_command)
+ostream& operator<<(ostream& o, Exp& ast_expression)
 {
-  return o << retrieve_expression_tag(ast_command.tag) << " in line " << ast_command.line << endl;
+  return o << retrieve_expression_tag(ast_expression.tag) << " in line " << ast_expression.line << endl;
 }
 
 void error(string message, Exp *ast_expression)
 {
   cout << "ERROR: " <<  message << endl
-       << "Command: " << *ast_expression << endl;
+       << "Expression: " << *ast_expression << endl;
   exit(1);
 }
 
