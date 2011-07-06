@@ -22,7 +22,7 @@ string TACFuncall::str()
 {
   if (params.size() == 0)
   {
-    return "()";
+    return name + "()";
   }
   
   stringstream ss;
@@ -193,6 +193,15 @@ string Brc::str()
   return ss.str();
 }
 
+string Funcall::str()
+{
+  stringstream ss;
+  
+  ss << "call " << *funcall;
+  
+  return ss.str();
+}
+
 // ostream operators
 ostream& operator<<(ostream& o, TACMember& v)
 {
@@ -243,3 +252,9 @@ ostream& operator<<(ostream& o, Brc& brc)
 {
   return o << brc.str();
 }
+
+ostream& operator<<(ostream& o, Funcall& funcall)
+{
+  return o << funcall.str();
+}
+

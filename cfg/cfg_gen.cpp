@@ -139,6 +139,24 @@ TACMember *gen_short_circuit(TACVar *target, Exp *ast_expression, CFG *cfg)
   }
 }
 
+vector<TACMember *> gen_funcall_params(ExpListNode *ast_params, CFG *cfg)
+{
+  vector<TACMember *> params;
+
+  while (ast_params != NULL)
+  {
+    Exp *param_exp = ast_params->exp;
+    
+    TACMember *param = gen_operations(NULL, param_exp, cfg);
+    
+    params.push_back(param);
+    
+    ast_params = ast_params->next;
+  }
+  
+  return params;
+}
+
 TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
 {
   if (ast_expression == NULL) {
@@ -187,18 +205,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
       string name = ast_expression->u.funcall.name;
       ExpListNode *ast_params = ast_expression->u.funcall.expl;
 
-      vector<TACMember *> params;
-
-      while (ast_params != NULL)
-      {
-        Exp *param_exp = ast_params->exp;
-        
-        TACMember *param = gen_operations(NULL, param_exp, cfg);
-        
-        params.push_back(param);
-        
-        ast_params = ast_params->next;
-      }
+      vector<TACMember *> params = gen_funcall_params(ast_params, cfg);
       
       TACMember *funcall = new TACFuncall(name, params);
       
@@ -248,10 +255,6 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
       return target;
       break;
     }
-    case EXP_CONV: {
-      error("CONV Expression Handling not supported!");
-      break;
-    }
     default: {
       error("Unhandled expression type", ast_expression);
       break;
@@ -285,6 +288,16 @@ BasicBlock *parse_ast_command(Command *ast_command, CFG *cfg)
       
       cfg->work_block->ops.push_back(ret);
       
+      break;
+    }
+    case COMMAND_FUNCALL: {
+      TACFuncall *tac_funcall = new TACFuncall(ast_command->u.funcall->u.funcall.name,
+                                               gen_funcall_params(ast_command->u.funcall->u.funcall.expl, cfg));
+
+      TACOperation *funcall = new Funcall(tac_funcall);
+      
+      cfg->work_block->ops.push_back(funcall);
+     
       break;
     }
     case COMMAND_WHILE: {

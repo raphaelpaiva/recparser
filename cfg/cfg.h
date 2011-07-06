@@ -60,7 +60,7 @@ class TACLiteral : public TACMember {
     
 };
 
-class TACFuncall : public TACMember, public TACOperation {
+class TACFuncall : public TACMember {
   public:
     vector<TACMember *> params;
   
@@ -176,4 +176,15 @@ class Brc : public TACOperation {
     string str();
 };
 
+class Funcall : public TACOperation {
+  public:
+    TACFuncall *funcall;
+    
+    Funcall() {};
+    Funcall(TACFuncall *paramFuncall) : funcall(paramFuncall) {};
+    
+    string str();
+};
+
 #endif
+
