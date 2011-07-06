@@ -108,6 +108,34 @@ TACMember *gen_short_circuit(TACVar *target, Exp *ast_expression, CFG *cfg)
     
     return target;
   }
+  else
+  {
+    BasicBlock *new_block = gen_basic_block(cfg);
+    
+    cfg->work_block->br(new_block);
+    
+    cfg->work_block = new_block;
+    
+    if (target == NULL)
+    {
+      target = gen_temp();
+    }
+    
+    gen_operations(target, ast_expression->u.binop.e1, cfg);
+    
+    new_block = gen_basic_block(cfg);
+    BasicBlock *final = gen_basic_block(cfg);
+    
+    cfg->work_block->brc(target, final, new_block);
+    cfg->work_block = new_block;
+    
+    gen_operations(target, ast_expression->u.binop.e2, cfg);
+    
+    cfg->work_block->br(final);
+    cfg->work_block = final;
+    
+    return target;
+  }
 }
 
 TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
