@@ -5,10 +5,18 @@
 
 using namespace std;
 
+TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic_block, CFG *cfg);
+TACMember *gen_attr_binop(TACVar *target, Exp *ast_expression, BasicBlock *basic_block, CFG *cfg);
+
 static int last_temp_index;
 static int last_global_index;
 
 Prog prog;
+
+bool can_short_circuit(int op)
+{
+  return op == TK_AND || op == TK_OR;
+}
 
 TACVar *gen_global(TACMember *value)
 {
@@ -39,6 +47,25 @@ BasicBlock *gen_basic_block(CFG *cfg)
   cfg->blocks.push_back(basic_block);
   
   return basic_block;
+}
+
+TACMember *gen_attr_binop(TACVar *target, Exp *ast_expression, BasicBlock *basic_block, CFG *cfg)
+{
+  TACMember *left = gen_operations(NULL, ast_expression->u.binop.e1, basic_block, cfg);
+  TACMember *right = gen_operations(NULL, ast_expression->u.binop.e2, basic_block, cfg);
+  
+  int op = ast_expression->u.binop.op;
+  
+  if (target == NULL)
+  {
+    target = gen_temp();
+  }
+  
+  TACOperation *operation = new TACAttr(target, left, op, right);
+  
+  basic_block->ops.push_back(operation);
+  
+  return target;
 }
 
 TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic_block, CFG *cfg)
@@ -78,21 +105,13 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
       break;
     }
     case EXP_BINOP: {
-      TACMember *left = gen_operations(NULL, ast_expression->u.binop.e1, basic_block, cfg);
-      TACMember *right = gen_operations(NULL, ast_expression->u.binop.e2, basic_block, cfg);
-      
-      int op = ast_expression->u.binop.op;
-      
-      if (target == NULL)
+      if (can_short_circuit(ast_expression->u.binop.op))
       {
-        target = gen_temp();
       }
-      
-      TACOperation *operation = new TACAttr(target, left, op, right);
-      
-      basic_block->ops.push_back(operation);
-      
-      return target;
+      else
+      {
+        return gen_attr_binop(target, ast_expression, basic_block, cfg);
+      }
       
       break;
     }
