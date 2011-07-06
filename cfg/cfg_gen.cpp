@@ -172,19 +172,18 @@ TACOperation *gen_return_operation(Exp *ast_expression, BasicBlock *basic_block)
   return ret;
 }
 
-vector<BasicBlock *> gen_commands(Block *ast_block)
+BasicBlock *gen_commands(Block *ast_block)
 {
-  vector<BasicBlock *> blocks;
   CommListNode *ast_commands;
   
   ast_commands = ast_block->comms;
+  
+  BasicBlock *basic_block = new BasicBlock();
   
   while (ast_commands != NULL)
   {
     Command *ast_command;
     ast_command = ast_commands->comm;
-    
-    BasicBlock *basic_block = new BasicBlock();
     
     switch(ast_command->tag)
     {
@@ -210,19 +209,17 @@ vector<BasicBlock *> gen_commands(Block *ast_block)
       }
     }
     
-    blocks.push_back(basic_block);
-    
     ast_commands = ast_commands->next;
   }
   
-  return blocks;
+  return basic_block;
 }
 
 CFG *gen_cfg(Declr *ast_declr)
 {
-  vector<BasicBlock *> blocks = gen_commands(ast_declr->u.func.block);
+  BasicBlock *block = gen_commands(ast_declr->u.func.block);
   
-  return new CFG(ast_declr->u.name, blocks);
+  return new CFG(ast_declr->u.name, block);
 }
 
 Prog gen_prog(DeclrListNode *ast_declrs)
