@@ -121,11 +121,11 @@ class BasicBlock {
 class CFG {
   public:
     string name;
-    BasicBlock *block;
+    vector<BasicBlock *> blocks;
     
     CFG() {};
     CFG(string paramName) : name(paramName) {};
-    CFG(string paramName, BasicBlock * paramBlock) : name(paramName), block(paramBlock) {};
+    CFG(string paramName, vector<BasicBlock *> paramBlocks) : name(paramName), blocks(paramBlocks) {};
     
     friend ostream& operator<<(ostream& o, CFG& c);
     

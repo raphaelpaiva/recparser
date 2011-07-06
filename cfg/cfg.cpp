@@ -103,7 +103,10 @@ string CFG::str()
   
   ss << name << ":" << endl;
   
-  ss << block->str(2) << endl;
+  for(vector<BasicBlock *>::iterator it = blocks.begin(); it != blocks.end(); ++it )
+  {
+    ss << (*it)->str(2) << endl;
+  }
   
   return ss.str();
 }
