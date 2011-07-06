@@ -108,6 +108,8 @@ class BasicBlock {
   public:
     int index;
     vector<TACOperation *> ops;
+    vector<BasicBlock *> succs;
+    vector<BasicBlock *> preds;
     
     BasicBlock() : index(last_index) { last_index++; };
 
@@ -116,12 +118,15 @@ class BasicBlock {
     string name();
     string str(int);
     string str();
+    
+    void br(BasicBlock *basic_block);
 };
 
 class CFG {
   public:
     string name;
     vector<BasicBlock *> blocks;
+    BasicBlock *work_block;
     
     CFG() {};
     CFG(string paramName) : name(paramName) {};
@@ -143,5 +148,15 @@ class Prog {
     string str();
 };
 
+
+class Br : public TACOperation {
+  public:
+    BasicBlock *basic_block;
+    
+    Br() {};
+    Br(BasicBlock *paramBasicBlock) : basic_block(paramBasicBlock) {};
+    
+    string str();
+};
 
 #endif

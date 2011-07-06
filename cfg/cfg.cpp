@@ -63,6 +63,26 @@ string TACAttr::str()
   return ss.str();
 }
 
+string Br::str()
+{
+  stringstream ss;
+  
+  ss << "br " << basic_block->name();
+  
+  return ss.str();
+}
+
+void BasicBlock::br(BasicBlock *basic_block)
+{
+  succs.push_back(basic_block);
+  
+  basic_block->preds.push_back(this);
+  
+  TACOperation *br = new Br(basic_block);
+  
+  ops.push_back(br);
+}
+
 string BasicBlock::name()
 {
   stringstream ss;
@@ -190,4 +210,9 @@ ostream& operator<<(ostream& o, Prog& prog)
 ostream& operator<<(ostream& o, Load& load)
 {
   return o << load.str();
+}
+
+ostream& operator<<(ostream& o, Br& br)
+{
+  return o << br.str();
 }
