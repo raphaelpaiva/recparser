@@ -287,22 +287,6 @@ BasicBlock *parse_ast_command(Command *ast_command, CFG *cfg)
       
       break;
     }
-    /*
-      if cmd[0] == "while":
-	      global bb
-	      test = new_bb()
-	      bb.br(test)
-	      bb = test
-	      cond = gen_op(cmd[1])
-	      body = new_bb()
-	      final = new_bb()
-	      bb.brc(cond, body, final)
-	      bb = body
-	      for cmd in cmd[2]:
-		      gen_cmd(cmd)
-	      bb.br(test)
-	      bb = final
-    */
     case COMMAND_WHILE: {
       BasicBlock *test = gen_basic_block(cfg);
       cfg->work_block->br(test);
