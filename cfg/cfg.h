@@ -124,7 +124,7 @@ class BasicBlock {
     string str();
     
     void br(BasicBlock *basic_block);
-    void brc(TACVar *var, BasicBlock *true_block, BasicBlock *false_block);
+    void brc(TACMember *cond, BasicBlock *true_block, BasicBlock *false_block);
 };
 
 class CFG {
@@ -166,12 +166,12 @@ class Br : public TACOperation {
 
 class Brc : public TACOperation {
   public:
-    TACVar *var;
+    TACMember *cond;
     BasicBlock *true_block;
     BasicBlock *false_block;
     
     Brc() {};
-    Brc(TACVar *paramVar, BasicBlock *paramTrue_block, BasicBlock *paramFalse_block) : var(paramVar), true_block(paramTrue_block), false_block(paramFalse_block) {};
+    Brc(TACMember *paramCond, BasicBlock *paramTrue_block, BasicBlock *paramFalse_block) : cond(paramCond), true_block(paramTrue_block), false_block(paramFalse_block) {};
     
     string str();
 };

@@ -83,12 +83,12 @@ void BasicBlock::br(BasicBlock *basic_block)
   ops.push_back(br);
 }
 
-void BasicBlock::brc(TACVar *var, BasicBlock *true_block, BasicBlock *false_block)
+void BasicBlock::brc(TACMember *cond, BasicBlock *true_block, BasicBlock *false_block)
 {
   succs.push_back(true_block);
   succs.push_back(false_block);
   
-  TACOperation *brc = new Brc(var, true_block, false_block);
+  TACOperation *brc = new Brc(cond, true_block, false_block);
   
   ops.push_back(brc);
   
@@ -188,7 +188,7 @@ string Brc::str()
 {
   stringstream ss;
   
-  ss << "brc " << *var << " " << true_block->name() << " " << false_block->name();
+  ss << "brc " << *cond << " " << true_block->name() << " " << false_block->name();
   
   return ss.str();
 }

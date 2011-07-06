@@ -7,6 +7,7 @@ using namespace std;
 
 TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg);
 TACMember *gen_attr_binop(TACVar *target, Exp *ast_expression, CFG *cfg);
+void parse_ast_commands(CommListNode *ast_commands, CFG *cfg);
 
 static int last_temp_index;
 static int last_global_index;
@@ -266,56 +267,96 @@ TACOperation *gen_return_operation(Exp *ast_expression, CFG *cfg)
   return ret;
 }
 
-BasicBlock *gen_commands(Block *ast_block, CFG *cfg)
+BasicBlock *parse_ast_command(Command *ast_command, CFG *cfg)
 {
-  CommListNode *ast_commands;
-  
-  ast_commands = ast_block->comms;
-  
-  BasicBlock *block = gen_basic_block(cfg);
-  
-  cfg->work_block = block;
-  
+  switch(ast_command->tag)
+  {
+    case COMMAND_ATTR: {
+      TACVar *target = gen_var(ast_command->u.attr.lvalue);
+
+      gen_operations(target, ast_command->u.attr.rvalue, cfg);
+
+      break;
+    }
+    case COMMAND_RET: {
+      TACOperation *ret;
+      
+      ret = gen_return_operation(ast_command->u.ret, cfg);
+      
+      cfg->work_block->ops.push_back(ret);
+      
+      break;
+    }
+    /*
+      if cmd[0] == "while":
+	      global bb
+	      test = new_bb()
+	      bb.br(test)
+	      bb = test
+	      cond = gen_op(cmd[1])
+	      body = new_bb()
+	      final = new_bb()
+	      bb.brc(cond, body, final)
+	      bb = body
+	      for cmd in cmd[2]:
+		      gen_cmd(cmd)
+	      bb.br(test)
+	      bb = final
+    */
+    case COMMAND_WHILE: {
+      BasicBlock *test = gen_basic_block(cfg);
+      cfg->work_block->br(test);
+      cfg->work_block = test;
+      
+      TACMember *cond = gen_operations(NULL, ast_command->u.cwhile.exp, cfg);
+      
+      BasicBlock *body = gen_basic_block(cfg);
+      BasicBlock *final = gen_basic_block(cfg);
+      
+      cfg->work_block->brc(cond, body, final);
+      cfg->work_block = body;
+      
+      parse_ast_command(ast_command->u.cwhile.comm, cfg);
+      
+      cfg->work_block->br(test);
+      cfg->work_block = final;
+      
+      break;
+    }
+    case COMMAND_BLOCK: {
+      parse_ast_commands(ast_command->u.block->comms, cfg);
+      break;
+    }
+    default: {
+      error("Unhandled command type.", ast_command);
+      break;
+    }
+  }
+    
+  return cfg->work_block;
+}
+
+void parse_ast_commands(CommListNode *ast_commands, CFG *cfg)
+{
   while (ast_commands != NULL)
   {
-    Command *ast_command;
-    ast_command = ast_commands->comm;
+    Command *ast_command = ast_commands->comm;
     
-    switch(ast_command->tag)
-    {
-      case COMMAND_ATTR: {
-        TACVar *target = gen_var(ast_command->u.attr.lvalue);
-
-        gen_operations(target, ast_command->u.attr.rvalue, cfg);
-
-        break;
-      }
-      case COMMAND_RET: {
-        TACOperation *ret;
-        
-        ret = gen_return_operation(ast_command->u.ret, cfg);
-        
-        cfg->work_block->ops.push_back(ret);
-        
-        break;
-      }
-      default: {
-        error("Unhandled command type.", ast_command);
-        break;
-      }
-    }
+    parse_ast_command(ast_command, cfg);
     
     ast_commands = ast_commands->next;
   }
-  
-  return cfg->work_block;
 }
 
 CFG *gen_cfg(Declr *ast_declr)
 {
   CFG *cfg = new CFG(ast_declr->u.name);
   
-  gen_commands(ast_declr->u.func.block, cfg);
+  BasicBlock *block = gen_basic_block(cfg);
+  
+  cfg->work_block = block;
+  
+  parse_ast_commands(ast_declr->u.func.block->comms, cfg);
   
   return cfg;
 }
