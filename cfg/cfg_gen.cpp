@@ -307,6 +307,45 @@ BasicBlock *parse_ast_command(Command *ast_command, CFG *cfg)
       
       break;
     }
+    case COMMAND_IF: {
+      BasicBlock *body_block;
+      BasicBlock *next_block;
+      
+      BasicBlock *test = gen_basic_block(cfg);
+      
+      cfg->work_block->br(test);
+      cfg->work_block = test;
+      
+      TACMember *cond = gen_operations(NULL, ast_command->u.cif.exp, cfg);
+
+      body_block = gen_basic_block(cfg);
+      
+      next_block = gen_basic_block(cfg);
+      
+      cfg->work_block->brc(cond, body_block, next_block);
+      cfg->work_block = body_block;
+      
+      parse_ast_command(ast_command->u.cif.comm, cfg);
+      
+      if (ast_command->u.cif.celse == NULL)
+      {
+        cfg->work_block->br(next_block);
+        cfg->work_block = next_block;
+      }
+      else
+      {
+        BasicBlock *final = gen_basic_block(cfg);
+        cfg->work_block->br(final);
+        
+        cfg->work_block = next_block;
+        parse_ast_command(ast_command->u.cif.celse, cfg);
+        
+        cfg->work_block->br(final);
+        cfg->work_block = final;
+      }
+      
+      break;
+    }
     case COMMAND_BLOCK: {
       parse_ast_commands(ast_command->u.block->comms, cfg);
       break;
