@@ -36,15 +36,24 @@ class TACVar : public TACMember {
     string str();
 };
 
+template<class T>
 class TACLiteral : public TACMember {
   public:
-    int value;
+    T value;
     
     TACLiteral() {};
     
-    TACLiteral(int paramValue) : value(paramValue) {};
+    TACLiteral(T paramValue) : value(paramValue) {};
     
-    string str();
+    string str()
+    {
+      stringstream ss;
+  
+      ss << value;
+
+      return ss.str();
+    }
+    
 };
 
 class TACFuncall : public TACMember, public TACOperation {
@@ -123,28 +132,11 @@ class CFG {
     string str();
 };
 
-template<class T>
-class Global : public TACMember {
-  public:
-    T value;
-    
-    Global() {};
-    Global(string paramName, T paramValue) : TACMember(paramName), value(paramValue) {};
-    
-    string str()
-    {
-      stringstream ss;
-
-      ss << name;
-
-      return ss.str();
-    }
-};
-
 class Prog {
   public:
     vector<CFG *> cfgs;
-    vector<TACMember *> globals;
+    vector<TACVar *> globals;
+    vector<TACAttr *>global_attrs;
     
     Prog() {};
     

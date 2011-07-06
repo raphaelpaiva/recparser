@@ -10,6 +10,24 @@ static int last_global_index;
 
 Prog prog;
 
+TACVar *gen_global(TACMember *value)
+{
+  stringstream name_ss;
+  name_ss << "gbl_" << last_global_index++;
+  
+  TACVar *global = new TACVar(name_ss.str());
+  
+  prog.globals.push_back(global);
+  
+  if (value != NULL)
+  {
+    TACAttr *attr = new TACAttr(global, value);
+    prog.global_attrs.push_back(attr);
+  }
+  
+  return global;
+}
+
 TACVar *gen_temp()
 {
   return new TACVar("t", last_temp_index++);
@@ -24,7 +42,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
   switch(ast_expression->tag)
   {
     case EXP_INT: {
-      TACMember *literal = new TACLiteral(ast_expression->u.ival);
+      TACMember *literal = new TACLiteral<int>(ast_expression->u.ival);
       
       if (target != NULL)
       {
@@ -104,7 +122,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
     case EXP_NEG : {
       TACMember *neg = gen_operations(NULL, ast_expression->u.exp, basic_block);
       
-      TACMember *zero = new TACLiteral(0);
+      TACMember *zero = new TACLiteral<int>(0);
       
       if (target == NULL)
       {
@@ -119,12 +137,9 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
       break;
     }
     case EXP_STRING: {
-       stringstream name_ss;
-      name_ss << "gbl_" << last_global_index++;
-  
-      TACMember *global = new Global<string>(name_ss.str(), ast_expression->u.sval);
+      TACMember *literal = new TACLiteral<string>(ast_expression->u.sval);
       
-      prog.globals.push_back(global);
+      TACVar *global = gen_global(literal);
       
       if (target == NULL)
       {

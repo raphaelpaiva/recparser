@@ -18,15 +18,6 @@ string TACVar::str()
   return ss.str();
 }
 
-string TACLiteral::str()
-{
-  stringstream ss;
-  
-  ss << value;
-  
-  return ss.str();
-}
-
 string TACFuncall::str()
 {
   if (params.size() == 0)
@@ -138,7 +129,7 @@ string Prog::str()
 {
   stringstream ss;
   
-  for (vector<TACMember *>::iterator it = globals.begin(); it != globals.end(); ++it)
+  for (vector<TACAttr *>::iterator it = global_attrs.begin(); it != global_attrs.end(); ++it)
   {
     ss << **it << endl;
   }
