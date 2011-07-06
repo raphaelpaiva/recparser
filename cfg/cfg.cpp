@@ -83,11 +83,24 @@ void BasicBlock::br(BasicBlock *basic_block)
   ops.push_back(br);
 }
 
+void BasicBlock::brc(TACVar *var, BasicBlock *true_block, BasicBlock *false_block)
+{
+  succs.push_back(true_block);
+  succs.push_back(false_block);
+  
+  TACOperation *brc = new Brc(var, true_block, false_block);
+  
+  ops.push_back(brc);
+  
+  true_block->preds.push_back(this);
+  false_block->preds.push_back(this);
+}
+
 string BasicBlock::name()
 {
   stringstream ss;
   
-  ss << "B" << index << ":";
+  ss << "B" << index;
   
   return ss.str();
 }
@@ -102,7 +115,7 @@ string BasicBlock::str(int indent)
     spaces += " ";
   }
   
-  ss << "  " << name() << endl;
+  ss << "  " << name() << ":" << endl;
 
   for(vector<TACOperation *>::iterator it = ops.begin(); it != ops.end(); ++it )
   {
@@ -171,6 +184,15 @@ string Load::str()
   return ss.str();
 }
 
+string Brc::str()
+{
+  stringstream ss;
+  
+  ss << "brc " << *var << " " << true_block->name() << " " << false_block->name();
+  
+  return ss.str();
+}
+
 // ostream operators
 ostream& operator<<(ostream& o, TACMember& v)
 {
@@ -215,4 +237,9 @@ ostream& operator<<(ostream& o, Load& load)
 ostream& operator<<(ostream& o, Br& br)
 {
   return o << br.str();
+}
+
+ostream& operator<<(ostream& o, Brc& brc)
+{
+  return o << brc.str();
 }

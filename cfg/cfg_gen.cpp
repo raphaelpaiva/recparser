@@ -13,6 +13,15 @@ static int last_global_index;
 
 Prog prog;
 
+TACVar *gen_var(Var *ast_var)
+{
+  stringstream ss;
+  
+  ss << ast_var->name << "_" << ast_var->var;
+  
+  return new TACVar(ss.str());
+}
+
 bool can_short_circuit(int op)
 {
   return op == TK_AND || op == TK_OR;
@@ -41,12 +50,13 @@ TACVar *gen_temp()
   return new TACVar("t", last_temp_index++);
 }
 
-void gen_basic_block(CFG *cfg)
+BasicBlock *gen_basic_block(CFG *cfg)
 {
   BasicBlock *basic_block = new BasicBlock();
 
   cfg->blocks.push_back(basic_block);
-  cfg->work_block = basic_block;
+  
+  return basic_block;
 }
 
 TACMember *gen_attr_binop(TACVar *target, Exp *ast_expression, CFG *cfg)
@@ -72,7 +82,31 @@ TACMember *gen_short_circuit(TACVar *target, Exp *ast_expression, CFG *cfg)
 {
   if (ast_expression->u.binop.op == TK_AND)
   {
+    BasicBlock *new_block = gen_basic_block(cfg);
     
+    cfg->work_block->br(new_block);
+    
+    cfg->work_block = new_block;
+    
+    if (target == NULL)
+    {
+      target = gen_temp();
+    }
+    
+    gen_operations(target, ast_expression->u.binop.e1, cfg);
+    
+    new_block = gen_basic_block(cfg);
+    BasicBlock *final = gen_basic_block(cfg);
+    
+    cfg->work_block->brc(target, new_block, final);
+    cfg->work_block = new_block;
+    
+    gen_operations(target, ast_expression->u.binop.e2, cfg);
+    
+    cfg->work_block->br(final);
+    cfg->work_block = final;
+    
+    return target;
   }
 }
 
@@ -97,11 +131,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
       break;
     }
     case EXP_VAR: {
-      stringstream ss;
-      
-      ss << ast_expression->u.var->name << "_" << ast_expression->u.var->var;
-      
-      TACMember *var = new TACVar(ss.str());
+      TACMember *var = gen_var(ast_expression->u.var);
       
       if (target != NULL)
       {
@@ -214,7 +244,9 @@ BasicBlock *gen_commands(Block *ast_block, CFG *cfg)
   
   ast_commands = ast_block->comms;
   
-  gen_basic_block(cfg);
+  BasicBlock *block = gen_basic_block(cfg);
+  
+  cfg->work_block = block;
   
   while (ast_commands != NULL)
   {
@@ -224,7 +256,7 @@ BasicBlock *gen_commands(Block *ast_block, CFG *cfg)
     switch(ast_command->tag)
     {
       case COMMAND_ATTR: {
-        TACVar *target = new TACVar(ast_command->u.attr.lvalue->name);
+        TACVar *target = gen_var(ast_command->u.attr.lvalue);
 
         gen_operations(target, ast_command->u.attr.rvalue, cfg);
 

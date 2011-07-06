@@ -31,7 +31,11 @@ class TACVar : public TACMember {
     int index;
     
     TACVar(string paramName) :  TACMember(paramName), index(0) { };
-    TACVar(string paramName, int temp_index) :  index(0) { stringstream ss; ss << paramName << temp_index; name = ss.str(); };
+    TACVar(string paramName, int temp_index) :  index(0) { 
+      stringstream ss;
+      ss << paramName << temp_index;
+      name = ss.str();
+    };
     
     string str();
 };
@@ -120,6 +124,7 @@ class BasicBlock {
     string str();
     
     void br(BasicBlock *basic_block);
+    void brc(TACVar *var, BasicBlock *true_block, BasicBlock *false_block);
 };
 
 class CFG {
@@ -155,6 +160,18 @@ class Br : public TACOperation {
     
     Br() {};
     Br(BasicBlock *paramBasicBlock) : basic_block(paramBasicBlock) {};
+    
+    string str();
+};
+
+class Brc : public TACOperation {
+  public:
+    TACVar *var;
+    BasicBlock *true_block;
+    BasicBlock *false_block;
+    
+    Brc() {};
+    Brc(TACVar *paramVar, BasicBlock *paramTrue_block, BasicBlock *paramFalse_block) : var(paramVar), true_block(paramTrue_block), false_block(paramFalse_block) {};
     
     string str();
 };
