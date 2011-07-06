@@ -154,7 +154,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
       break;
     }
     case EXP_CONV: {
-      error("CONV Expression Handling not implemented yet!");
+      error("CONV Expression Handling not supported!");
       break;
     }
     default: {
