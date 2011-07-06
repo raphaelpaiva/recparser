@@ -134,16 +134,6 @@ string TACReturn::str()
   return ss.str();
 }
 
-template<class T>
-string Global<T>::str()
-{
-  stringstream ss;
-  
-  ss << name << value;
-  
-  return ss.str();
-}
-
 string Prog::str()
 {
   stringstream ss;
@@ -157,6 +147,15 @@ string Prog::str()
   {
     ss << **it << endl;
   }
+  
+  return ss.str();
+}
+
+string Load::str()
+{
+  stringstream ss;
+  
+  ss << *target << " <- load " << *value;
   
   return ss.str();
 }
@@ -195,4 +194,9 @@ ostream& operator<<(ostream& o, TACReturn& ret)
 ostream& operator<<(ostream& o, Prog& prog)
 {
   return o << prog.str();
+}
+
+ostream& operator<<(ostream& o, Load& load)
+{
+  return o << load.str();
 }

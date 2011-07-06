@@ -5,10 +5,12 @@ int bla(int p, int q)
 
 int main()
 {
-	int a; int b;
+	int a; int b; char[] c;
 	a = 1 + 2 + 25*a;
 	
 	b = 2 + bla(a, b);
+	
+	c = "uhuuuu";
 	
 	return -(a + b);
 }

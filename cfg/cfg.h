@@ -82,6 +82,17 @@ class TACAttr : public TACOperation {
     string str();
 };
 
+class Load : public TACOperation {
+  public:
+    TACMember *target;
+    TACMember *value;
+    
+    Load() {};
+    Load(TACMember *paramTarget, TACMember *paramValue) : target(paramTarget), value(paramValue) {};
+    
+    string str();
+};
+
 static int last_index = 0;
 
 class BasicBlock {
@@ -117,10 +128,17 @@ class Global : public TACMember {
   public:
     T value;
     
-    Global<T>() {};
-    Global<T>(string paramName, T paramValue) : TACMember(paramName), value(paramValue) {};
+    Global() {};
+    Global(string paramName, T paramValue) : TACMember(paramName), value(paramValue) {};
     
-    string str();
+    string str()
+    {
+      stringstream ss;
+
+      ss << name;
+
+      return ss.str();
+    }
 };
 
 class Prog {

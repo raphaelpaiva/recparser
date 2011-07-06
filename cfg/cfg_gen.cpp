@@ -6,6 +6,7 @@
 using namespace std;
 
 static int last_temp_index;
+static int last_global_index;
 
 Prog prog;
 
@@ -118,7 +119,23 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, BasicBlock *basic
       break;
     }
     case EXP_STRING: {
-      error("String Expression Handling not implemented yet!");
+       stringstream name_ss;
+      name_ss << "gbl_" << last_global_index++;
+  
+      TACMember *global = new Global<string>(name_ss.str(), ast_expression->u.sval);
+      
+      prog.globals.push_back(global);
+      
+      if (target == NULL)
+      {
+        target = gen_temp();
+      }
+      
+      TACOperation *load = new Load(target, global);
+      
+      basic_block->ops.push_back(load);
+      
+      return target;
       break;
     }
     case EXP_CONV: {
