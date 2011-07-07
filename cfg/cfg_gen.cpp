@@ -393,10 +393,7 @@ CFG *gen_cfg(Declr *ast_declr)
   
   Block *ast_block = ast_declr->u.func.block;
   
-  if (ast_block != NULL)
-  {
-    parse_ast_commands(ast_block->comms, cfg);
-  }
+  parse_ast_commands(ast_block->comms, cfg);
   
   return cfg;
 }
@@ -405,7 +402,7 @@ Prog gen_prog(DeclrListNode *ast_declrs)
 {
   while(ast_declrs != NULL)
   {
-    if (ast_declrs->declr->tag == DECLR_FUNC)
+    if (ast_declrs->declr->tag == DECLR_FUNC && ast_declrs->declr->u.func.block != NULL)
     {
       CFG *cfg = gen_cfg(ast_declrs->declr);
       prog.cfgs.push_back(cfg);
