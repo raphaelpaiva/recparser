@@ -43,7 +43,7 @@ string retrieve_operation_string(int op)
       break;
     }
     default: {
-      ss << op;
+      ss << (char) op;
       break;
     }
   }
