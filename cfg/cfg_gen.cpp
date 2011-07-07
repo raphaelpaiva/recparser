@@ -286,7 +286,7 @@ BasicBlock *parse_ast_command(Command *ast_command, CFG *cfg)
       
       ret = gen_return_operation(ast_command->u.ret, cfg);
       
-      cfg->work_block->ops.push_back(ret);
+      cfg->work_block->ret(ret);
       
       break;
     }

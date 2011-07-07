@@ -112,11 +112,13 @@ static int last_index = 0;
 class BasicBlock {
   public:
     int index;
+    bool has_return_operation;
+    
     vector<TACOperation *> ops;
     vector<BasicBlock *> succs;
     vector<BasicBlock *> preds;
     
-    BasicBlock() : index(last_index) { last_index++; };
+    BasicBlock() : index(last_index), has_return_operation(false) { last_index++; };
 
     friend ostream& operator<<(ostream& o, BasicBlock& b);
     
@@ -126,6 +128,7 @@ class BasicBlock {
     
     void br(BasicBlock *basic_block);
     void brc(TACMember *cond, BasicBlock *true_block, BasicBlock *false_block);
+    void ret(TACOperation *ret);
 };
 
 class CFG {

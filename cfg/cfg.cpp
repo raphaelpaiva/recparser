@@ -81,28 +81,41 @@ string Br::str()
   return ss.str();
 }
 
+void BasicBlock::ret(TACOperation *ret)
+{
+  ops.push_back(ret);
+  
+  has_return_operation = true;
+}
+
 void BasicBlock::br(BasicBlock *basic_block)
 {
-  succs.push_back(basic_block);
+  if (!has_return_operation)
+  {
+    succs.push_back(basic_block);
   
-  basic_block->preds.push_back(this);
-  
-  TACOperation *br = new Br(basic_block);
-  
-  ops.push_back(br);
+    basic_block->preds.push_back(this);
+
+    TACOperation *br = new Br(basic_block);
+
+    ops.push_back(br);
+  }
 }
 
 void BasicBlock::brc(TACMember *cond, BasicBlock *true_block, BasicBlock *false_block)
 {
-  succs.push_back(true_block);
-  succs.push_back(false_block);
-  
-  TACOperation *brc = new Brc(cond, true_block, false_block);
-  
-  ops.push_back(brc);
-  
-  true_block->preds.push_back(this);
-  false_block->preds.push_back(this);
+  if (!has_return_operation)
+  {
+    succs.push_back(true_block);
+    succs.push_back(false_block);
+    
+    TACOperation *brc = new Brc(cond, true_block, false_block);
+    
+    ops.push_back(brc);
+    
+    true_block->preds.push_back(this);
+    false_block->preds.push_back(this);
+  }
 }
 
 string BasicBlock::name()
