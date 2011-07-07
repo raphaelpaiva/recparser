@@ -57,7 +57,7 @@ string TACAttr::str()
   
   if (op != 0)
   {
-    ss << " " << (char) op << " " << *right;
+    ss << " " << retrieve_operation_string(op) << " " << *right;
   }
   
   return ss.str();

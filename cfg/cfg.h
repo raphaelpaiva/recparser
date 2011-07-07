@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include "ast_utils.h"
 
 using namespace std;
 
