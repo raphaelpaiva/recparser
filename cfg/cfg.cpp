@@ -4,6 +4,15 @@
 
 using namespace std;
 
+template<>
+string TACLiteral<string>::str() {
+  stringstream ss;
+  
+  ss << "\"" << value << "\"";
+  
+  return ss.str();
+}
+
 string TACMember::str()
 {
   return name;
