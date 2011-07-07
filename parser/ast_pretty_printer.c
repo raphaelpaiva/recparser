@@ -200,6 +200,9 @@ void print_exp(Exp* e) {
     case EXP_INT:
       fprintf(outfile, "%i", e->u.ival);
       break;
+    case EXP_CONV:
+      print_exp(e->u.conv.exp);
+      break;
     case EXP_FLOAT:
       fprintf(outfile, "%f", e->u.fval);
       break;
