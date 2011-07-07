@@ -389,10 +389,14 @@ CFG *gen_cfg(Declr *ast_declr)
   CFG *cfg = new CFG(ast_declr->u.name);
   
   BasicBlock *block = gen_basic_block(cfg);
-  
   cfg->work_block = block;
   
-  parse_ast_commands(ast_declr->u.func.block->comms, cfg);
+  Block *ast_block = ast_declr->u.func.block;
+  
+  if (ast_block != NULL)
+  {
+    parse_ast_commands(ast_block->comms, cfg);
+  }
   
   return cfg;
 }
