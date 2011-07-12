@@ -139,6 +139,11 @@ string retrieve_expression_tag(int tag)
   return ss.str();
 }
 
+bool can_short_circuit(int op)
+{
+  return op == TK_AND || op == TK_OR;
+}
+
 void error(string message)
 {
   cout << "ERROR: " << message << endl;

@@ -23,11 +23,6 @@ TACVar *gen_var(Var *ast_var)
   return new TACVar(ss.str());
 }
 
-bool can_short_circuit(int op)
-{
-  return op == TK_AND || op == TK_OR;
-}
-
 TACVar *gen_global(TACMember *value)
 {
   stringstream name_ss;

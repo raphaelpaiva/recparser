@@ -13,6 +13,7 @@ extern "C" {
 using namespace std;
 
 string retrieve_operation_string(int op);
+bool can_short_circuit(int op);
 void error(string message);
 void error(string message, Command *ast_command);
 void error(string message, Exp *ast_expression);
