@@ -5,7 +5,7 @@
 using namespace std;
 
 template<>
-string TACLiteral<string>::str() {
+string Literal<string>::str() {
   stringstream ss;
   
   ss << "\"" << value << "\"";

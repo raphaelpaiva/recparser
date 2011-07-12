@@ -42,13 +42,13 @@ class TACVar : public TACMember {
 };
 
 template<class T>
-class TACLiteral : public TACMember {
+class Literal : public TACMember {
   public:
     T value;
     
-    TACLiteral() {};
+    Literal() {};
     
-    TACLiteral(T paramValue) : value(paramValue) {};
+    Literal(T paramValue) : value(paramValue) {};
     
     string str()
     {

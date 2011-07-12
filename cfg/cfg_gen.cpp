@@ -161,7 +161,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
   switch(ast_expression->tag)
   {
     case EXP_INT: {
-      TACMember *literal = new TACLiteral<int>(ast_expression->u.ival);
+      TACMember *literal = new Literal<int>(ast_expression->u.ival);
       
       if (target != NULL)
       {
@@ -219,7 +219,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
     case EXP_NEG : {
       TACMember *neg = gen_operations(NULL, ast_expression->u.exp, cfg);
       
-      TACMember *zero = new TACLiteral<int>(0);
+      TACMember *zero = new Literal<int>(0);
       
       if (target == NULL)
       {
@@ -234,7 +234,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
       break;
     }
     case EXP_STRING: {
-      TACMember *literal = new TACLiteral<string>(ast_expression->u.sval);
+      TACMember *literal = new Literal<string>(ast_expression->u.sval);
       
       TACVar *global = gen_global(literal);
       
