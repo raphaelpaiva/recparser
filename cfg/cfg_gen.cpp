@@ -260,7 +260,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
 Operation *gen_return_operation(Exp *ast_expression, CFG *cfg)
 {
   TACMember *ret_value = gen_operations(NULL, ast_expression, cfg);
-  Operation *ret = new TACReturn(ret_value);
+  Operation *ret = new Return(ret_value);
   
   return ret;
 }

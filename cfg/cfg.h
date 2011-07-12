@@ -72,12 +72,12 @@ class TACFuncall : public TACMember {
     string str();
 };
 
-class TACReturn : public Operation {
+class Return : public Operation {
   public:
     TACMember *value;
 
-    TACReturn() : value(NULL) {};
-    TACReturn(TACMember *paramValue) : value(paramValue) {};
+    Return() : value(NULL) {};
+    Return(TACMember *paramValue) : value(paramValue) {};
     string str();
 };
 

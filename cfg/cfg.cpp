@@ -166,7 +166,7 @@ string CFG::str()
   return ss.str();
 }
 
-string TACReturn::str()
+string Return::str()
 {
   stringstream ss;
   
@@ -250,7 +250,7 @@ ostream& operator<<(ostream& o, CFG& c)
   return o << c.str();
 }
 
-ostream& operator<<(ostream& o, TACReturn& ret)
+ostream& operator<<(ostream& o, Return& ret)
 {
   return o << ret.str();
 }
