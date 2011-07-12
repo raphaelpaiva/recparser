@@ -67,7 +67,7 @@ TACMember *gen_attr_binop(TACVar *target, Exp *ast_expression, CFG *cfg)
     target = gen_temp();
   }
   
-  TACOperation *operation = new TACAttr(target, left, op, right);
+  Operation *operation = new TACAttr(target, left, op, right);
   
   cfg->work_block->ops.push_back(operation);
   
@@ -165,7 +165,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
       
       if (target != NULL)
       {
-        TACOperation *operation = new TACAttr(target, literal);
+        Operation *operation = new TACAttr(target, literal);
         cfg->work_block->ops.push_back(operation);
       }
       
@@ -177,7 +177,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
       
       if (target != NULL)
       {
-        TACOperation *operation = new TACAttr(target, var);
+        Operation *operation = new TACAttr(target, var);
         cfg->work_block->ops.push_back(operation);
       }
       
@@ -209,7 +209,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
         target = gen_temp();
       }
       
-      TACOperation *attr = new TACAttr(target, funcall);
+      Operation *attr = new TACAttr(target, funcall);
       
       cfg->work_block->ops.push_back(attr);
       
@@ -226,7 +226,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
         target = gen_temp();
       }
       
-      TACOperation *attr = new TACAttr(target, zero, '-', neg);
+      Operation *attr = new TACAttr(target, zero, '-', neg);
       
       cfg->work_block->ops.push_back(attr);
       
@@ -243,7 +243,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
         target = gen_temp();
       }
       
-      TACOperation *load = new Load(target, global);
+      Operation *load = new Load(target, global);
       
       cfg->work_block->ops.push_back(load);
       
@@ -257,10 +257,10 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
   }
 }
 
-TACOperation *gen_return_operation(Exp *ast_expression, CFG *cfg)
+Operation *gen_return_operation(Exp *ast_expression, CFG *cfg)
 {
   TACMember *ret_value = gen_operations(NULL, ast_expression, cfg);
-  TACOperation *ret = new TACReturn(ret_value);
+  Operation *ret = new TACReturn(ret_value);
   
   return ret;
 }
@@ -277,7 +277,7 @@ void parse_ast_command(Command *ast_command, CFG *cfg)
       break;
     }
     case COMMAND_RET: {
-      TACOperation *ret;
+      Operation *ret;
       
       ret = gen_return_operation(ast_command->u.ret, cfg);
       
@@ -289,7 +289,7 @@ void parse_ast_command(Command *ast_command, CFG *cfg)
       TACFuncall *tac_funcall = new TACFuncall(ast_command->u.funcall->u.funcall.name,
                                                gen_funcall_params(ast_command->u.funcall->u.funcall.expl, cfg));
 
-      TACOperation *funcall = new Funcall(tac_funcall);
+      Operation *funcall = new Funcall(tac_funcall);
       
       cfg->work_block->ops.push_back(funcall);
      

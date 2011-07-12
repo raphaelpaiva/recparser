@@ -9,10 +9,10 @@
 
 using namespace std;
 
-class TACOperation {
+class Operation {
 	public:
 		virtual string str();
-		friend ostream& operator<<(ostream& o, TACOperation& op);
+		friend ostream& operator<<(ostream& o, Operation& op);
 };
 
 class TACMember {
@@ -72,7 +72,7 @@ class TACFuncall : public TACMember {
     string str();
 };
 
-class TACReturn : public TACOperation {
+class TACReturn : public Operation {
   public:
     TACMember *value;
 
@@ -81,7 +81,7 @@ class TACReturn : public TACOperation {
     string str();
 };
 
-class TACAttr : public TACOperation {
+class TACAttr : public Operation {
   public:
     TACMember *target;
     TACMember *left;
@@ -96,7 +96,7 @@ class TACAttr : public TACOperation {
     string str();
 };
 
-class Load : public TACOperation {
+class Load : public Operation {
   public:
     TACMember *target;
     TACMember *value;
@@ -114,7 +114,7 @@ class BasicBlock {
     int index;
     bool has_return_operation;
     
-    vector<TACOperation *> ops;
+    vector<Operation *> ops;
     vector<BasicBlock *> succs;
     vector<BasicBlock *> preds;
     
@@ -128,7 +128,7 @@ class BasicBlock {
     
     void br(BasicBlock *basic_block);
     void brc(TACMember *cond, BasicBlock *true_block, BasicBlock *false_block);
-    void ret(TACOperation *ret);
+    void ret(Operation *ret);
 };
 
 class CFG {
@@ -158,7 +158,7 @@ class Prog {
 };
 
 
-class Br : public TACOperation {
+class Br : public Operation {
   public:
     BasicBlock *basic_block;
     
@@ -168,7 +168,7 @@ class Br : public TACOperation {
     string str();
 };
 
-class Brc : public TACOperation {
+class Brc : public Operation {
   public:
     TACMember *cond;
     BasicBlock *true_block;
@@ -180,7 +180,7 @@ class Brc : public TACOperation {
     string str();
 };
 
-class Funcall : public TACOperation {
+class Funcall : public Operation {
   public:
     TACFuncall *funcall;
     
