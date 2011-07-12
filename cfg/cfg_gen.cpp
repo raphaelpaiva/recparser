@@ -265,7 +265,7 @@ TACOperation *gen_return_operation(Exp *ast_expression, CFG *cfg)
   return ret;
 }
 
-BasicBlock *parse_ast_command(Command *ast_command, CFG *cfg)
+void parse_ast_command(Command *ast_command, CFG *cfg)
 {
   switch(ast_command->tag)
   {
@@ -364,7 +364,6 @@ BasicBlock *parse_ast_command(Command *ast_command, CFG *cfg)
     }
   }
     
-  return cfg->work_block;
 }
 
 void parse_ast_commands(CommListNode *ast_commands, CFG *cfg)
