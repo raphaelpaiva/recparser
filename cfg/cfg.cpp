@@ -1,85 +1,9 @@
 #include <cstdlib>
 #include <sstream>
 #include "cfg.h"
+#include "branch_operations.h"
 
 using namespace std;
-
-template<>
-string Literal<string>::str() {
-  stringstream ss;
-  
-  ss << "\"" << value << "\"";
-  
-  return ss.str();
-}
-
-string TACMember::str()
-{
-  return name;
-}
-
-string TACVar::str()
-{
-  stringstream ss;
-  
-  ss << name << "_" << index;
-  
-  return ss.str();
-}
-
-string TACFuncall::str()
-{
-  if (params.size() == 0)
-  {
-    return name + "()";
-  }
-  
-  stringstream ss;
-  
-  ss << name << '(';
-  
-  for (vector<TACMember *>::iterator it = params.begin(); it != params.end(); ++it)
-  {
-    ss << (*it)->str() << ", ";
-  }
-  
-  string partial = ss.str();
-  
-
-  partial = partial.substr(0, partial.length() - 2);
-  
-  partial += ")";
-  
-  return partial;
-}
-
-string Operation::str()
-{
-    return "Generic Operation";
-}
-
-string TACAttr::str()
-{
-  stringstream ss;
-  
-  ss << *target << " <- " << *left;
-  
-  if (op != 0)
-  {
-    ss << " " << retrieve_operation_string(op) << " " << *right;
-  }
-  
-  return ss.str();
-}
-
-string Br::str()
-{
-  stringstream ss;
-  
-  ss << "br " << basic_block->name();
-  
-  return ss.str();
-}
 
 void BasicBlock::ret(Operation *ret)
 {
@@ -166,20 +90,6 @@ string CFG::str()
   return ss.str();
 }
 
-string Return::str()
-{
-  stringstream ss;
-  
-  ss << "ret ";
-  
-  if (value != NULL)
-  {
-    ss << *value;
-  }
-  
-  return ss.str();
-}
-
 string Prog::str()
 {
   stringstream ss;
@@ -197,48 +107,8 @@ string Prog::str()
   return ss.str();
 }
 
-string Load::str()
-{
-  stringstream ss;
-  
-  ss << *target << " <- load " << *value;
-  
-  return ss.str();
-}
-
-string Brc::str()
-{
-  stringstream ss;
-  
-  ss << "brc " << *cond << " " << true_block->name() << " " << false_block->name();
-  
-  return ss.str();
-}
-
-string Funcall::str()
-{
-  stringstream ss;
-  
-  ss << "call " << *funcall;
-  
-  return ss.str();
-}
 
 // ostream operators
-ostream& operator<<(ostream& o, TACMember& v)
-{
-  return o << v.str();
-}
-
-ostream& operator<<(ostream& o, Operation& op)
-{
-  return o << op.str();
-}
-
-ostream& operator<<(ostream& o, TACAttr& op)
-{
-  return o << op.str();
-}
 
 ostream& operator<<(ostream& o, BasicBlock& b)
 {
@@ -248,35 +118,5 @@ ostream& operator<<(ostream& o, BasicBlock& b)
 ostream& operator<<(ostream& o, CFG& c)
 {
   return o << c.str();
-}
-
-ostream& operator<<(ostream& o, Return& ret)
-{
-  return o << ret.str();
-}
-
-ostream& operator<<(ostream& o, Prog& prog)
-{
-  return o << prog.str();
-}
-
-ostream& operator<<(ostream& o, Load& load)
-{
-  return o << load.str();
-}
-
-ostream& operator<<(ostream& o, Br& br)
-{
-  return o << br.str();
-}
-
-ostream& operator<<(ostream& o, Brc& brc)
-{
-  return o << brc.str();
-}
-
-ostream& operator<<(ostream& o, Funcall& funcall)
-{
-  return o << funcall.str();
 }
 

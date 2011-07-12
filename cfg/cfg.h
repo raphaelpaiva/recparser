@@ -5,107 +5,10 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include "ast_utils.h"
+#include "TAC.h"
+#include "operations.h"
 
 using namespace std;
-
-class Operation {
-	public:
-		virtual string str();
-		friend ostream& operator<<(ostream& o, Operation& op);
-};
-
-class TACMember {
-  public:
-    string name;
-  
-    TACMember() {};
-    TACMember(string paramName) : name(paramName) {};
-    
-    friend ostream& operator<<(ostream& o, TACMember& m);
-    
-    virtual string str();
-};
-
-class TACVar : public TACMember {
-  public:
-    int index;
-    
-    TACVar(string paramName) :  TACMember(paramName), index(0) { };
-    TACVar(string paramName, int temp_index) :  index(0) { 
-      stringstream ss;
-      ss << paramName << temp_index;
-      name = ss.str();
-    };
-    
-    string str();
-};
-
-template<class T>
-class Literal : public TACMember {
-  public:
-    T value;
-    
-    Literal() {};
-    
-    Literal(T paramValue) : value(paramValue) {};
-    
-    string str()
-    {
-      stringstream ss;
-  
-      ss << value;
-
-      return ss.str();
-    }
-    
-};
-
-class TACFuncall : public TACMember {
-  public:
-    vector<TACMember *> params;
-  
-    TACFuncall() {};
-    TACFuncall(string paramName) : TACMember(paramName) {};
-    TACFuncall(string paramName, vector<TACMember *> paramParams) : TACMember(paramName), params(paramParams) {};
-    
-    string str();
-};
-
-class Return : public Operation {
-  public:
-    TACMember *value;
-
-    Return() : value(NULL) {};
-    Return(TACMember *paramValue) : value(paramValue) {};
-    string str();
-};
-
-class TACAttr : public Operation {
-  public:
-    TACMember *target;
-    TACMember *left;
-    TACMember *right;
-    int op;
-    
-    TACAttr() {};
-    TACAttr(TACMember *paramTarget, TACMember *paramLeft, int paramOp, TACMember *paramRight) : target(paramTarget), left(paramLeft), right(paramRight), op(paramOp) {} ;
-    TACAttr(TACMember *paramTarget, TACMember *paramLeft) : target(paramTarget), left(paramLeft), op(0), right(NULL) {} ;
-    friend ostream& operator<<(ostream& o, TACAttr& op);
-    
-    string str();
-};
-
-class Load : public Operation {
-  public:
-    TACMember *target;
-    TACMember *value;
-    
-    Load() {};
-    Load(TACMember *paramTarget, TACMember *paramValue) : target(paramTarget), value(paramValue) {};
-    
-    string str();
-};
 
 static int last_index = 0;
 
@@ -153,39 +56,6 @@ class Prog {
     vector<TACAttr *>global_attrs;
     
     Prog() {};
-    
-    string str();
-};
-
-
-class Br : public Operation {
-  public:
-    BasicBlock *basic_block;
-    
-    Br() {};
-    Br(BasicBlock *paramBasicBlock) : basic_block(paramBasicBlock) {};
-    
-    string str();
-};
-
-class Brc : public Operation {
-  public:
-    TACMember *cond;
-    BasicBlock *true_block;
-    BasicBlock *false_block;
-    
-    Brc() {};
-    Brc(TACMember *paramCond, BasicBlock *paramTrue_block, BasicBlock *paramFalse_block) : cond(paramCond), true_block(paramTrue_block), false_block(paramFalse_block) {};
-    
-    string str();
-};
-
-class Funcall : public Operation {
-  public:
-    TACFuncall *funcall;
-    
-    Funcall() {};
-    Funcall(TACFuncall *paramFuncall) : funcall(paramFuncall) {};
     
     string str();
 };
