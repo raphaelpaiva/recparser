@@ -25,7 +25,7 @@ int main(int argc, char **argv)
   
   Prog program = gen_prog(ast);
   
-  cout << program.str(); //TODO: cout << program Y U NO WORK?
+  cout << program; //TODO: cout << program Y U NO WORK?
   
   return 0;
 }

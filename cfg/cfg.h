@@ -57,6 +57,8 @@ class Prog {
     
     Prog() {};
     
+    friend ostream& operator<<(ostream& o, Prog& prog);
+    
     string str();
 };
 

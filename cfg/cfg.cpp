@@ -120,3 +120,8 @@ ostream& operator<<(ostream& o, CFG& c)
   return o << c.str();
 }
 
+ostream& operator<<(ostream& o, Prog& prog)
+{
+  return o << prog.str();
+}
+
