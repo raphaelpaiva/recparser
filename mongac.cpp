@@ -27,11 +27,15 @@ int main(int argc, char **argv)
   
   cout << program.str();
   
-  r = rpo(program.cfgs[0]);
+  dom_tree(program.cfgs[0]);
   
-  for (vector<int>::iterator it = r.begin(); it != r.end(); ++it)
+  for (vector<BasicBlock *>::iterator block = program.cfgs[0]->blocks.begin(); block != program.cfgs[0]->blocks.end(); ++block)
   {
-    cout << *it << endl;
+    cout << (*block)->name() << ": " << endl;
+    for(vector<BasicBlock *>::iterator child = (*block)->children.begin(); child != (*block)->children.end(); ++child)
+    {
+      cout << "  " << (*child)->index << endl;
+    }
   }
   
   return 0;

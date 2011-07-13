@@ -1,23 +1,12 @@
 #include <map>
 #include <iostream>
+#include <algorithm>
 #include "ssa.h"
 
-/*
- def rpo(nodes):
-    marks = {}
-    n = [len(nodes)-1]
-    rpo = [0] * len(nodes)
-    def bfs_visit(node):
-        marks[node] = True
-        for child in node.succs:
-            if not marks.get(child, False):
-                bfs_visit(child)
-        node.rpo = n[0]
-        rpo[node.rpo] = node
-        n[0] -= 1
-    bfs_visit(nodes[0])
-    return rpo
-*/
+bool compare_basic_block_by_index(BasicBlock *b1, BasicBlock *b2)
+{
+  return b1->index < b2->index;
+}
 
 void bfs_visit(BasicBlock *block, map<int, bool> &marks, vector<int> &n, vector<int> &rpo)
 {
@@ -49,4 +38,50 @@ vector<int> rpo(CFG *cfg)
   return rpo;
 }
 
+BasicBlock *intersect(BasicBlock *left, BasicBlock *right)
+{
+  BasicBlock *finger1 = left;
+  BasicBlock *finger2 = right;
+  
+  while (finger1->index != finger2->index)
+  {
+    while (finger1->rpo > finger2->rpo)
+    {
+      finger1 = finger1->idom;
+    }
+    while(finger2->rpo > finger1->rpo)
+    {
+      finger2 = finger2->idom;
+    }
+  }
+  
+  return finger1;
+}
 
+void dom_tree(CFG* cfg)
+{
+  vector<int> nodes_rpo = rpo(cfg);
+  cfg->blocks[0]->idom = cfg->blocks[0];
+  
+  for (int i = 1; i < cfg->blocks.size(); i++)
+  {
+    int block_index = nodes_rpo[i];
+    BasicBlock *block = cfg->blocks[block_index];
+    
+    if (block->preds.size() == 2 && block->preds[1]->idom != NULL)
+    {
+      block->idom = intersect(block->preds[0], block->preds[1]);
+      block->idom->children.push_back(block);
+    }
+    else
+    {
+      block->idom = block->preds[0];
+      block->idom->children.push_back(block);
+    }
+  }
+  
+  for (vector<BasicBlock *>::iterator block = cfg->blocks.begin(); block != cfg->blocks.end(); ++block)
+  {
+    sort((*block)->children.begin(), (*block)->children.end(), compare_basic_block_by_index);
+  }
+}

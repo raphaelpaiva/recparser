@@ -4,6 +4,6 @@
 
 #include "../cfg/cfg.h"
 
-vector<int> rpo(CFG *cfg);
+void dom_tree(CFG* cfg);
 
 #endif

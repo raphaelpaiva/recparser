@@ -17,12 +17,14 @@ class BasicBlock {
     int index;
     bool has_return_operation;
     int rpo;
+    BasicBlock *idom;
     
     vector<Operation *> ops;
     vector<BasicBlock *> succs;
     vector<BasicBlock *> preds;
+    vector<BasicBlock *> children;
     
-    BasicBlock() : index(last_index), has_return_operation(false) { last_index++; };
+    BasicBlock() : index(last_index), has_return_operation(false), idom(NULL) { last_index++; };
 
     friend ostream& operator<<(ostream& o, BasicBlock& b);
     
