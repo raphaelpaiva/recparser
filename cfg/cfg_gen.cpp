@@ -243,9 +243,9 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
         target = gen_temp();
       }
       
-      Operation *load = new Load(target, global);
+      Operation *attr = new TACAttr(target, global);
       
-      cfg->work_block->ops.push_back(load);
+      cfg->work_block->ops.push_back(attr);
       
       return target;
       break;
