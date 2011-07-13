@@ -70,6 +70,7 @@ TACMember *gen_attr_binop(TACVar *target, Exp *ast_expression, CFG *cfg)
   Operation *operation = new TACAttr(target, left, op, right);
   
   cfg->work_block->ops.push_back(operation);
+  cfg->work_block->vars.insert(target);
   
   return target;
 }
@@ -167,6 +168,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
       {
         Operation *operation = new TACAttr(target, literal);
         cfg->work_block->ops.push_back(operation);
+        cfg->work_block->vars.insert(target);
       }
       
       return literal;
@@ -179,6 +181,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
       {
         Operation *operation = new TACAttr(target, var);
         cfg->work_block->ops.push_back(operation);
+        cfg->work_block->vars.insert(target);
       }
       
       return var;
@@ -212,6 +215,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
       Operation *attr = new TACAttr(target, funcall);
       
       cfg->work_block->ops.push_back(attr);
+      cfg->work_block->vars.insert(target);
       
       return target;
       break;
@@ -229,6 +233,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
       Operation *attr = new TACAttr(target, zero, '-', neg);
       
       cfg->work_block->ops.push_back(attr);
+      cfg->work_block->vars.insert(target);
       
       return target;
       break;
@@ -246,6 +251,7 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
       Operation *attr = new TACAttr(target, global);
       
       cfg->work_block->ops.push_back(attr);
+      cfg->work_block->vars.insert(target);
       
       return target;
       break;

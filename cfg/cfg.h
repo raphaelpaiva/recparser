@@ -21,10 +21,14 @@ class BasicBlock {
     BasicBlock *idom;
     
     vector<Operation *> ops;
+    
     vector<BasicBlock *> succs;
     vector<BasicBlock *> preds;
     vector<BasicBlock *> children;
+    
     set<BasicBlock *> dom_frontier;
+    
+    set<TACMember *> vars;
     
     BasicBlock() : index(last_index), has_return_operation(false), idom(NULL) { last_index++; };
 
