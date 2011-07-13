@@ -16,6 +16,7 @@ class BasicBlock {
   public:
     int index;
     bool has_return_operation;
+    int rpo;
     
     vector<Operation *> ops;
     vector<BasicBlock *> succs;

@@ -11,11 +11,12 @@ BIN = bin
 
 PARSER_DIR = parser
 CFG_DIR = cfg
+SSA_DIR = ssa
 
 _C_OBJ = ast_pretty_printer.o driver.o  lex.yy.o symtab.o type_checker.o
 C_OBJ = $(patsubst %,$(OUT)/%,$(_C_OBJ))
 
-_CXX_OBJ = TAC.o operations.o branch_operations.o cfg.o cfg_gen.o ast_utils.o
+_CXX_OBJ = TAC.o operations.o branch_operations.o cfg.o cfg_gen.o ast_utils.o ssa.o
 CXX_OBJ = $(patsubst %,$(OUT)/%,$(_CXX_OBJ))
 
 all: prepare mongac
@@ -29,7 +30,11 @@ $(OUT)/%.o: $(PARSER_DIR)/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 # Compilando CFG
-$(OUT)/%.o: cfg/%.cpp $(DEPS)
+$(OUT)/%.o: $(CFG_DIR)/%.cpp $(DEPS)
+	$(CXX) -c -o $@ $< $(CXX_FLAGS)
+
+# Compilando SSA
+$(OUT)/%.o: $(SSA_DIR)/%.cpp $(DEPS)
 	$(CXX) -c -o $@ $< $(CXX_FLAGS)
 
 #Compilando o mongac

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include "cfg/cfg_gen.h"
+#include "ssa/ssa.h"
 
 extern "C" {
         #include "parser/driver.h"
@@ -14,9 +15,8 @@ using namespace std;
 int main(int argc, char **argv)
 {
   DeclrListNode *ast;
+  vector<int> r;
   
-  vector<CFG *> cfgs;
-
   ast = read_ast(argc, argv);
 
   check_prog(ast);
@@ -25,7 +25,14 @@ int main(int argc, char **argv)
   
   Prog program = gen_prog(ast);
   
-  cout << program; //TODO: cout << program Y U NO WORK?
+  cout << program.str();
+  
+  r = rpo(program.cfgs[0]);
+  
+  for (vector<int>::iterator it = r.begin(); it != r.end(); ++it)
+  {
+    cout << *it << endl;
+  }
   
   return 0;
 }
