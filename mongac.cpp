@@ -28,13 +28,26 @@ int main(int argc, char **argv)
   cout << program.str();
   
   dom_tree(program.cfgs[0]);
-  
+
+  cout << "=== dom_tree ===" << endl;
   for (vector<BasicBlock *>::iterator block = program.cfgs[0]->blocks.begin(); block != program.cfgs[0]->blocks.end(); ++block)
   {
     cout << (*block)->name() << ": " << endl;
     for(vector<BasicBlock *>::iterator child = (*block)->children.begin(); child != (*block)->children.end(); ++child)
     {
       cout << "  " << (*child)->index << endl;
+    }
+  }
+  
+  dom_frontier(program.cfgs[0]);
+  
+  cout << "=== dom_frontier ===" << endl;
+  for (vector<BasicBlock *>::iterator block = program.cfgs[0]->blocks.begin(); block != program.cfgs[0]->blocks.end(); ++block)
+  {
+    cout << (*block)->name() << ": " << endl;
+    for(set<BasicBlock *>::iterator df = (*block)->dom_frontier.begin(); df != (*block)->dom_frontier.end(); ++df)
+    {
+      cout << "  " << (*df)->index << endl;
     }
   }
   

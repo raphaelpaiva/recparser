@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <set>
 #include "TAC.h"
 #include "operations.h"
 
@@ -23,6 +24,7 @@ class BasicBlock {
     vector<BasicBlock *> succs;
     vector<BasicBlock *> preds;
     vector<BasicBlock *> children;
+    set<BasicBlock *> dom_frontier;
     
     BasicBlock() : index(last_index), has_return_operation(false), idom(NULL) { last_index++; };
 

@@ -85,3 +85,23 @@ void dom_tree(CFG* cfg)
     sort((*block)->children.begin(), (*block)->children.end(), compare_basic_block_by_index);
   }
 }
+
+void dom_frontier(CFG *cfg)
+{
+  for (vector<BasicBlock *>::iterator block = cfg->blocks.begin(); block != cfg->blocks.end(); ++block)
+  {
+    if ((*block)->preds.size() > 1)
+    {
+      for(vector<BasicBlock *>::iterator pred = (*block)->preds.begin(); pred != (*block)->preds.end(); ++pred)
+      {
+        BasicBlock *runner = *pred;
+        while (runner->index != (*block)->idom->index)
+        {
+          runner->dom_frontier.insert(*block);
+          runner = runner->idom;
+        }
+      }
+    }
+  }
+}
+
