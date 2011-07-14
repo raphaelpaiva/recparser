@@ -4,14 +4,14 @@
 #include "ssa.h"
 #include "../cfg/branch_operations.h"
 
-template<class T, class U>
-bool map_contains(map<T, U> m, T t)
+template<class T, class U, class Comparator>
+bool map_contains(map<T, U, Comparator> m, T t)
 {
   return m.find(t) != m.end();
 }
 
-template<class T>
-bool set_contains(set<T> s, T t)
+template<class T, class Comparator>
+bool set_contains(set<T, Comparator> s, T t)
 {
   return s.find(t) != s.end();
 }
@@ -166,14 +166,28 @@ TACVar *retrieve_operand(Operation *op)
 */
 
 
-set<TACVar *> globals;
-map<TACVar *, set<BasicBlock *> > blocks;
 //op[1] = dest; op[2] = left; op[3] = right;
 void find_globals(CFG *cfg)
 {
+  set<TACVar *, TACVarComparator> globals;
+  map<TACVar *, set<BasicBlock *>, TACVarComparator> blocks;
+  
   for (vector<BasicBlock *>::iterator block = cfg->blocks.begin(); block != cfg->blocks.end(); ++block)
   {
-    set<TACVar *> locals;
+    for (set<TACVar *>::iterator var = (*block)->vars.begin(); var != (*block)->vars.end(); ++var)
+    {
+      if (!map_contains<TACVar *, set<BasicBlock *> >(blocks, (*var)))
+      {
+        blocks[(*var)];
+        cout << **var << " in blocks " << map_contains<TACVar *, set<BasicBlock *> >(blocks, *var) << endl; 
+      }
+    }
+  }
+
+  for (vector<BasicBlock *>::iterator block = cfg->blocks.begin(); block != cfg->blocks.end(); ++block)
+  {
+    set<TACVar *, TACVarComparator> locals;
+    
     for (int i = 0; i < (*block)->ops.size(); ++i)
     {
       Operation *op = (*block)->ops[i];
@@ -181,28 +195,77 @@ void find_globals(CFG *cfg)
       if (!is_type_operation<TACAttr>(op))
       {
         TACVar *var = retrieve_operand(op);
-        if ( (var != NULL) && (map_contains<TACVar *, set<BasicBlock *> >(blocks, var) &&
-                                !set_contains<TACVar *>(locals, var)) )
+        if (var != NULL)
         {
-          globals.insert(var);
-          blocks[var].insert((*block));
+          if (map_contains<TACVar *, set<BasicBlock *>, TACVarComparator>(blocks, var) && !set_contains<TACVar *, TACVarComparator>(locals, var))
+          {
+            globals.insert(var);
+            blocks[var].insert((*block));
+          }
         }
       }
-      else
+      else if(is_type_operation<TACAttr>(op))
       {
         TACAttr *attr = dynamic_cast<TACAttr *>(op);
         if (attr != NULL)
         {
-           TACVar *left = dynamic_cast<TACVar *>(attr->left);
-           if ( (left != NULL) && (map_contains<TACVar *, set<BasicBlock *> >(blocks, left) &&
-                                  !set_contains<TACVar *>(locals, left)) )
+          cout << "OE! attr_operation: " << *attr << " in block " << (*block)->index << endl;
+          
+          TACVar *left = dynamic_cast<TACVar *>(attr->left);
+          TACVar *right = dynamic_cast<TACVar *>(attr->right);
+          TACVar *target = attr->target;
+
+          if ( (left != NULL) && (map_contains<TACVar *, set<BasicBlock *>, TACVarComparator>(blocks, left) &&
+                                !set_contains<TACVar *, TACVarComparator>(locals, left)) )
+          {
+            cout << ">> inserindo global: " << *left << *block << endl;
+            globals.insert(left);
+          }
+          
+          if ( (right != NULL) && (map_contains<TACVar *, set<BasicBlock *>, TACVarComparator>(blocks, right) &&
+                                !set_contains<TACVar *, TACVarComparator>(locals, right)) )
+          {
+            cout << ">> inserindo global: " << *left << *block << endl;
+            globals.insert(right);
+          }
+          
+          cout << ">> inserindo local: " << *attr->target << " em " << (*block)->index << endl;
+          locals.insert(attr->target);
+          blocks[attr->target].insert((*block));
+        }
+      }
+      if (is_type_operation<TACFuncall>(op))
+      {
+        TACFuncall *funcall = dynamic_cast<TACFuncall *>(op);
+        
+        if(funcall != NULL)
+        {
+          cout << "OE! TACFuncall_operation: " << *funcall << " in block " << (*block)->index << endl;
+          for (vector<TACMember *>::iterator param = funcall->params.begin(); param != funcall->params.end(); ++param)
+          {
+            TACVar *var_param = dynamic_cast<TACVar *>(*param);
+      
+            if ( (var_param != NULL) && (map_contains<TACVar *, set<BasicBlock *>, TACVarComparator>(blocks, var_param) &&
+                                         !set_contains<TACVar *, TACVarComparator>(locals, var_param)) )
             {
-              globals.insert(left);
-              globals.insert(attr->target);
-              blocks[attr->target].insert((*block));
+              cout << ">> inserindo global: " << *left << *block << endl;
+              globals.insert(var_param);
             }
+          }
         }
       }
     }
+  }
+  
+/*  cout << "=== locals === " << endl;
+  for (set<TACVar *>::iterator var = locals.begin(); var != locals.end(); ++var)
+  {
+    cout << (*var) << endl;
+  }
+  */
+  cout << "=== globals === " << endl;
+  for (set<TACVar *>::iterator var = globals.begin(); var != globals.end(); ++var)
+  {
+    cout << **var << endl;
   }
 }

@@ -34,6 +34,12 @@ class TACVar : public TACMember {
     string str();
 };
 
+struct TACVarComparator {
+  bool operator() (TACVar *v1, TACVar *v2) {
+    return v1->name < v2->name;
+  }
+};
+
 template<class T>
 class Literal : public TACMember {
   public:
