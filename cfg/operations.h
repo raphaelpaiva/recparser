@@ -23,14 +23,14 @@ class Return : public Operation {
 
 class TACAttr : public Operation {
   public:
-    TACMember *target;
+    TACVar *target;
     TACMember *left;
     TACMember *right;
     int op;
     
     TACAttr() {};
-    TACAttr(TACMember *paramTarget, TACMember *paramLeft, int paramOp, TACMember *paramRight) : target(paramTarget), left(paramLeft), right(paramRight), op(paramOp) {} ;
-    TACAttr(TACMember *paramTarget, TACMember *paramLeft) : target(paramTarget), left(paramLeft), op(0), right(NULL) {} ;
+    TACAttr(TACVar *paramTarget, TACMember *paramLeft, int paramOp, TACMember *paramRight) : target(paramTarget), left(paramLeft), right(paramRight), op(paramOp) {} ;
+    TACAttr(TACVar *paramTarget, TACMember *paramLeft) : target(paramTarget), left(paramLeft), op(0), right(NULL) {} ;
     friend ostream& operator<<(ostream& o, TACAttr& op);
     
     string str();

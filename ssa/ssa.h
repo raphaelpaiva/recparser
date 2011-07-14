@@ -6,5 +6,6 @@
 
 void dom_tree(CFG* cfg);
 void dom_frontier(CFG *cfg);
+void find_globals(CFG *cfg);
 
 #endif

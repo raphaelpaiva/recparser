@@ -61,6 +61,8 @@ int main(int argc, char **argv)
     }
   }
   
+  find_globals(program.cfgs[0]);
+  
   return 0;
 }
 

@@ -2,6 +2,19 @@
 #include <iostream>
 #include <algorithm>
 #include "ssa.h"
+#include "../cfg/branch_operations.h"
+
+template<class T, class U>
+bool map_contains(map<T, U> m, T t)
+{
+  return m.find(t) != m.end();
+}
+
+template<class T>
+bool set_contains(set<T> s, T t)
+{
+  return s.find(t) != s.end();
+}
 
 bool compare_basic_block_by_index(BasicBlock *b1, BasicBlock *b2)
 {
@@ -13,8 +26,7 @@ void bfs_visit(BasicBlock *block, map<int, bool> &marks, vector<int> &n, vector<
   marks[block->index] = true;
   for (vector<BasicBlock *>::iterator child = block->succs.begin(); child != block->succs.end(); ++child)
   {
-    bool child_is_not_marked = marks.find((*child)->index) == marks.end();
-    if (child_is_not_marked)
+    if (!map_contains<int, bool>(marks, (*child)->index))
     {
       bfs_visit(*child, marks, n, rpo);
     }
@@ -105,3 +117,92 @@ void dom_frontier(CFG *cfg)
   }
 }
 
+template<class T>
+T *is_type_operation(Operation *op)
+{
+  return dynamic_cast<T *>(op);
+}
+
+TACVar *retrieve_operand(Operation *op)
+{
+  if (is_type_operation<Return>(op))
+  {
+    Return *ret = dynamic_cast<Return *>(op);
+    return dynamic_cast<TACVar *>(ret->value);
+  }
+  
+  if (is_type_operation<Brc>(op))
+  {
+    Brc *brc = dynamic_cast<Brc *>(op);
+    return dynamic_cast<TACVar *>(brc->cond);
+  }
+  
+  return NULL;
+}
+
+/*
+  def find_globals(nodes):
+    blocks = {}
+    for n in nodes:
+        for var in n.vars:
+            if not var in blocks:
+                blocks[var] = set()
+    globals = set()
+    for n in nodes:
+        locals = set()
+        for i in range(len(n.ops)-1):
+            op = n.ops[i]
+            if op[0] != "=" and op[3] in blocks and op[3] not in locals:
+                globals.add(op[3])
+            if op[2] in blocks and op[2] not in locals:
+                globals.add(op[2])
+            locals.add(op[1])
+            blocks[op[1]].add(n)
+        jump = n.ops[-1]
+        if jump != "br":
+            if jump[1] in blocks and jump[1] not in locals:
+                globals.add(jump[1])
+    return (globals, blocks)
+*/
+
+
+set<TACVar *> globals;
+map<TACVar *, set<BasicBlock *> > blocks;
+//op[1] = dest; op[2] = left; op[3] = right;
+void find_globals(CFG *cfg)
+{
+  for (vector<BasicBlock *>::iterator block = cfg->blocks.begin(); block != cfg->blocks.end(); ++block)
+  {
+    set<TACVar *> locals;
+    for (int i = 0; i < (*block)->ops.size(); ++i)
+    {
+      Operation *op = (*block)->ops[i];
+      
+      if (!is_type_operation<TACAttr>(op))
+      {
+        TACVar *var = retrieve_operand(op);
+        if ( (var != NULL) && (map_contains<TACVar *, set<BasicBlock *> >(blocks, var) &&
+                                !set_contains<TACVar *>(locals, var)) )
+        {
+          globals.insert(var);
+          blocks[var].insert((*block));
+        }
+      }
+      else
+      {
+        TACAttr *attr = dynamic_cast<TACAttr *>(op);
+        if (attr != NULL)
+        {
+           TACVar *left = dynamic_cast<TACVar *>(attr->left);
+           if ( (left != NULL) && (map_contains<TACVar *, set<BasicBlock *> >(blocks, left) &&
+                                  !set_contains<TACVar *>(locals, left)) )
+            {
+              globals.insert(left);
+              globals.insert(attr->target);
+              blocks[attr->target].insert((*block));
+            }
+        }
+      }
+    }
+  }
+}
