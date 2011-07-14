@@ -28,7 +28,7 @@ class BasicBlock {
     
     set<BasicBlock *> dom_frontier;
     
-    set<TACMember *> vars;
+    set<TACVar *> vars;
     
     BasicBlock() : index(last_index), has_return_operation(false), idom(NULL) { last_index++; };
 

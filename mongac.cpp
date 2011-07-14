@@ -55,7 +55,7 @@ int main(int argc, char **argv)
   for (vector<BasicBlock *>::iterator block = program.cfgs[0]->blocks.begin(); block != program.cfgs[0]->blocks.end(); ++block)
   {
     cout << (*block)->name() << ": " << endl;
-    for(set<TACMember *>::iterator var = (*block)->vars.begin(); var != (*block)->vars.end(); ++var)
+    for(set<TACVar *>::iterator var = (*block)->vars.begin(); var != (*block)->vars.end(); ++var)
     {
       cout << "  " << **var << endl;
     }
