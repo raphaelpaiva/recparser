@@ -140,6 +140,47 @@ TACVar *retrieve_operand(Operation *op)
   return NULL;
 }
 
+void parse_attr_var(TACVar *var, set<TACVar *, TACVarComparator>& globals, map<TACVar *, set<BasicBlock *>, TACVarComparator>& blocks, set<TACVar *, TACVarComparator>& locals)
+{
+  if (var != NULL)
+  {
+    bool blocks_contains_var = map_contains<TACVar *, set<BasicBlock *>, TACVarComparator>(blocks, var);
+    bool locals_contains_var = set_contains<TACVar *, TACVarComparator>(locals, var);
+    
+    if (blocks_contains_var && !locals_contains_var)
+    {
+      cout << ">> inserindo global: " << *var << endl;
+      globals.insert(var);
+    }
+    
+  }
+}
+
+void parse_attr_member(TACMember *member, set<TACVar *, TACVarComparator>& globals, map<TACVar *, set<BasicBlock *>, TACVarComparator>& blocks, set<TACVar *, TACVarComparator>& locals)
+{
+  TACVar *var = dynamic_cast<TACVar *>(member);
+  
+  if (var != NULL)
+  {
+    parse_attr_var(var, globals, blocks, locals);
+    return;
+  }
+  
+  TACFuncall *funcall = dynamic_cast<TACFuncall *>(member);
+  
+  if (funcall != NULL)
+  {
+    vector<TACMember *> params = funcall->params;
+    
+    for (vector<TACMember *>::iterator param = params.begin(); param != params.end(); ++param)
+    {
+      parse_attr_member(*param, globals, blocks, locals);
+    }
+    
+    return;
+  }
+}
+
 /*
   def find_globals(nodes):
     blocks = {}
@@ -215,33 +256,22 @@ void find_globals(CFG *cfg)
           TACVar *right = dynamic_cast<TACVar *>(attr->right);
           TACVar *target = attr->target;
 
-          if ( (left != NULL) && (map_contains<TACVar *, set<BasicBlock *>, TACVarComparator>(blocks, left) &&
-                                !set_contains<TACVar *, TACVarComparator>(locals, left)) )
-          {
-            cout << ">> inserindo global: " << *left << *block << endl;
-            globals.insert(left);
-          }
-          
-          if ( (right != NULL) && (map_contains<TACVar *, set<BasicBlock *>, TACVarComparator>(blocks, right) &&
-                                !set_contains<TACVar *, TACVarComparator>(locals, right)) )
-          {
-            cout << ">> inserindo global: " << *left << *block << endl;
-            globals.insert(right);
-          }
-          
+          parse_attr_member(attr->left, globals, blocks, locals);
+          parse_attr_member(attr->right, globals, blocks, locals);
+
           cout << ">> inserindo local: " << *attr->target << " em " << (*block)->index << endl;
           locals.insert(attr->target);
           blocks[attr->target].insert((*block));
         }
       }
-      if (is_type_operation<TACFuncall>(op))
+      if (is_type_operation<Funcall>(op))
       {
-        TACFuncall *funcall = dynamic_cast<TACFuncall *>(op);
+        Funcall *funcall = dynamic_cast<Funcall *>(op);
         
         if(funcall != NULL)
         {
           cout << "OE! TACFuncall_operation: " << *funcall << " in block " << (*block)->index << endl;
-          for (vector<TACMember *>::iterator param = funcall->params.begin(); param != funcall->params.end(); ++param)
+          for (vector<TACMember *>::iterator param = funcall->funcall->params.begin(); param != funcall->funcall->params.end(); ++param)
           {
             TACVar *var_param = dynamic_cast<TACVar *>(*param);
       
