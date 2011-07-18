@@ -269,17 +269,6 @@ for (set<TACVar *>::iterator var = locals.begin(); var != locals.end(); ++var)
     cout << **var << endl;
   }
   
-  /*
-    def add_phis(globals, blocks):
-    for var in globals:
-        worklist = list(blocks[var])
-        while len(worklist) > 0:
-            block = worklist.pop(0)
-            for frontier in block.df:
-                if frontier.add_phi(var):
-                    worklist.append(frontier)
-  */
-  
   for (set<TACVar *>::iterator var = globals.begin(); var != globals.end(); ++var)
   {
     list<BasicBlock *> work_list(blocks[*var].begin(), blocks[*var].end());
