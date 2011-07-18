@@ -6,6 +6,7 @@
 #include <sstream>
 #include <vector>
 #include <set>
+#include <map>
 #include "TAC.h"
 #include "operations.h"
 
@@ -30,6 +31,8 @@ class BasicBlock {
     
     set<TACVar *> vars;
     
+    map<TACVar *, vector< pair<TACVar *, BasicBlock *> > > phis;
+    
     BasicBlock() : index(last_index), has_return_operation(false), idom(NULL) { last_index++; };
 
     friend ostream& operator<<(ostream& o, BasicBlock& b);
@@ -41,6 +44,7 @@ class BasicBlock {
     void br(BasicBlock *basic_block);
     void brc(TACMember *cond, BasicBlock *true_block, BasicBlock *false_block);
     void ret(Operation *ret);
+    bool add_phi(TACVar *var);
 };
 
 class CFG {

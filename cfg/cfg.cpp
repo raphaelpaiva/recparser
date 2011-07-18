@@ -1,9 +1,31 @@
 #include <cstdlib>
 #include <sstream>
+#include <algorithm>
 #include "cfg.h"
 #include "branch_operations.h"
 
 using namespace std;
+
+bool BasicBlock::add_phi(TACVar *var)
+{
+  if (phis.count(var) == 0)
+  {
+    vector<pair<TACVar *, BasicBlock *> > pairs;
+    
+    for (vector<BasicBlock *>::iterator block = preds.begin(); block != preds.end(); ++block)
+    {
+      pair<TACVar *, BasicBlock *> pair(var, *block);
+      
+      pairs.push_back(pair);
+    }
+    
+    phis[var] = pairs;
+    
+    return true;
+  }
+  
+  return false;
+}
 
 void BasicBlock::ret(Operation *ret)
 {
@@ -62,7 +84,25 @@ string BasicBlock::str(int indent)
   }
   
   ss << "  " << name() << ":" << endl;
-
+  
+  for (map<TACVar *, vector<pair<TACVar *, BasicBlock *> > >::iterator phis_member = phis.begin(); phis_member != phis.end(); ++phis_member)
+  {
+    ss << spaces << *(*phis_member).first << " <- " << "phi( ";
+    
+    vector<pair<TACVar *, BasicBlock *> > phis_vector = (*phis_member).second;
+    
+    for (vector<pair<TACVar *, BasicBlock *> >::iterator phi = phis_vector.begin(); phi != phis_vector.end(); ++phi )
+    {
+      ss << *(*phi).first << ", " << (*phi).second->name() << ", "; 
+    }
+    
+    long pos = ss.tellp();
+    
+    ss.seekp(pos - 2);
+  
+    ss << " )" << endl;
+  }
+  
   for(vector<Operation *>::iterator it = ops.begin(); it != ops.end(); ++it )
   {
     ss << spaces << **it << endl;

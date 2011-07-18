@@ -25,43 +25,11 @@ int main(int argc, char **argv)
   
   Prog program = gen_prog(ast);
   
-  cout << program.str();
+  cout << program;
   
-  dom_tree(program.cfgs[1]);
-
-  cout << "=== dom_tree ===" << endl;
-  for (vector<BasicBlock *>::iterator block = program.cfgs[1]->blocks.begin(); block != program.cfgs[1]->blocks.end(); ++block)
-  {
-    cout << (*block)->name() << ": " << endl;
-    for(vector<BasicBlock *>::iterator child = (*block)->children.begin(); child != (*block)->children.end(); ++child)
-    {
-      cout << "  " << (*child)->index << endl;
-    }
-  }
+  full_ssa(program.cfgs[1]);
   
-  dom_frontier(program.cfgs[1]);
-  
-  cout << "=== dom_frontier ===" << endl;
-  for (vector<BasicBlock *>::iterator block = program.cfgs[1]->blocks.begin(); block != program.cfgs[1]->blocks.end(); ++block)
-  {
-    cout << (*block)->name() << ": " << endl;
-    for(set<BasicBlock *>::iterator df = (*block)->dom_frontier.begin(); df != (*block)->dom_frontier.end(); ++df)
-    {
-      cout << "  " << (*df)->index << endl;
-    }
-  }
-  
-  cout << "=== vars ===" << endl;
-  for (vector<BasicBlock *>::iterator block = program.cfgs[1]->blocks.begin(); block != program.cfgs[1]->blocks.end(); ++block)
-  {
-    cout << (*block)->name() << ": " << endl;
-    for(set<TACVar *>::iterator var = (*block)->vars.begin(); var != (*block)->vars.end(); ++var)
-    {
-      cout << "  " << **var << endl;
-    }
-  }
-  
-  find_globals(program.cfgs[1]);
+  cout << program;
   
   return 0;
 }

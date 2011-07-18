@@ -1,8 +1,11 @@
 #include <map>
 #include <iostream>
 #include <algorithm>
+#include <list>
 #include "ssa.h"
 #include "../cfg/branch_operations.h"
+
+void parse_attr_funcall_params(vector<TACMember *>& params, set<TACVar *, TACVarComparator>& globals, map<TACVar *, set<BasicBlock *>, TACVarComparator>& blocks, set<TACVar *, TACVarComparator>& locals);
 
 template<class T, class U, class Comparator>
 bool map_contains(map<T, U, Comparator> m, T t)
@@ -170,45 +173,21 @@ void parse_attr_member(TACMember *member, set<TACVar *, TACVarComparator>& globa
   
   if (funcall != NULL)
   {
-    vector<TACMember *> params = funcall->params;
-    
-    for (vector<TACMember *>::iterator param = params.begin(); param != params.end(); ++param)
-    {
-      parse_attr_member(*param, globals, blocks, locals);
-    }
-    
+    cout << "OE!! TACFuncall: " << *funcall << endl;
+    parse_attr_funcall_params(funcall->params, globals, blocks, locals);
     return;
   }
 }
 
-/*
-  def find_globals(nodes):
-    blocks = {}
-    for n in nodes:
-        for var in n.vars:
-            if not var in blocks:
-                blocks[var] = set()
-    globals = set()
-    for n in nodes:
-        locals = set()
-        for i in range(len(n.ops)-1):
-            op = n.ops[i]
-            if op[0] != "=" and op[3] in blocks and op[3] not in locals:
-                globals.add(op[3])
-            if op[2] in blocks and op[2] not in locals:
-                globals.add(op[2])
-            locals.add(op[1])
-            blocks[op[1]].add(n)
-        jump = n.ops[-1]
-        if jump != "br":
-            if jump[1] in blocks and jump[1] not in locals:
-                globals.add(jump[1])
-    return (globals, blocks)
-*/
+void parse_attr_funcall_params(vector<TACMember *>& params, set<TACVar *, TACVarComparator>& globals, map<TACVar *, set<BasicBlock *>, TACVarComparator>& blocks, set<TACVar *, TACVarComparator>& locals)
+{
+  for (vector<TACMember *>::iterator param = params.begin(); param != params.end(); ++param)
+  {
+    parse_attr_member(*param, globals, blocks, locals);
+  }
+}
 
-
-//op[1] = dest; op[2] = left; op[3] = right;
-void find_globals(CFG *cfg)
+void find_globals_and_add_phis(CFG *cfg)
 {
   set<TACVar *, TACVarComparator> globals;
   map<TACVar *, set<BasicBlock *>, TACVarComparator> blocks;
@@ -220,7 +199,6 @@ void find_globals(CFG *cfg)
       if (!map_contains<TACVar *, set<BasicBlock *> >(blocks, (*var)))
       {
         blocks[(*var)];
-        cout << **var << " in blocks " << map_contains<TACVar *, set<BasicBlock *> >(blocks, *var) << endl; 
       }
     }
   }
@@ -241,17 +219,16 @@ void find_globals(CFG *cfg)
           if (map_contains<TACVar *, set<BasicBlock *>, TACVarComparator>(blocks, var) && !set_contains<TACVar *, TACVarComparator>(locals, var))
           {
             globals.insert(var);
-            blocks[var].insert((*block));
           }
         }
       }
-      else if(is_type_operation<TACAttr>(op))
+      
+      if(is_type_operation<TACAttr>(op))
       {
         TACAttr *attr = dynamic_cast<TACAttr *>(op);
+
         if (attr != NULL)
         {
-          cout << "OE! attr_operation: " << *attr << " in block " << (*block)->index << endl;
-          
           TACVar *left = dynamic_cast<TACVar *>(attr->left);
           TACVar *right = dynamic_cast<TACVar *>(attr->right);
           TACVar *target = attr->target;
@@ -264,38 +241,106 @@ void find_globals(CFG *cfg)
           blocks[attr->target].insert((*block));
         }
       }
+      
       if (is_type_operation<Funcall>(op))
       {
         Funcall *funcall = dynamic_cast<Funcall *>(op);
         
         if(funcall != NULL)
         {
-          cout << "OE! TACFuncall_operation: " << *funcall << " in block " << (*block)->index << endl;
-          for (vector<TACMember *>::iterator param = funcall->funcall->params.begin(); param != funcall->funcall->params.end(); ++param)
-          {
-            TACVar *var_param = dynamic_cast<TACVar *>(*param);
-      
-            if ( (var_param != NULL) && (map_contains<TACVar *, set<BasicBlock *>, TACVarComparator>(blocks, var_param) &&
-                                         !set_contains<TACVar *, TACVarComparator>(locals, var_param)) )
-            {
-              cout << ">> inserindo global: " << *left << *block << endl;
-              globals.insert(var_param);
-            }
-          }
+          cout << "OE! Funcall_operation: " << *funcall << " in block " << (*block)->index << endl;
+          parse_attr_funcall_params(funcall->funcall->params, globals, blocks, locals);
         }
       }
     }
   }
   
-/*  cout << "=== locals === " << endl;
-  for (set<TACVar *>::iterator var = locals.begin(); var != locals.end(); ++var)
-  {
-    cout << (*var) << endl;
-  }
-  */
+/*
+cout << "=== locals === " << endl;
+for (set<TACVar *>::iterator var = locals.begin(); var != locals.end(); ++var)
+{
+  cout << (*var) << endl;
+}
+*/
+  
   cout << "=== globals === " << endl;
   for (set<TACVar *>::iterator var = globals.begin(); var != globals.end(); ++var)
   {
     cout << **var << endl;
   }
+  
+  /*
+    def add_phis(globals, blocks):
+    for var in globals:
+        worklist = list(blocks[var])
+        while len(worklist) > 0:
+            block = worklist.pop(0)
+            for frontier in block.df:
+                if frontier.add_phi(var):
+                    worklist.append(frontier)
+  */
+  
+  for (set<TACVar *>::iterator var = globals.begin(); var != globals.end(); ++var)
+  {
+    list<BasicBlock *> work_list(blocks[*var].begin(), blocks[*var].end());
+    
+    while (work_list.size() > 0)
+    {
+      BasicBlock *block = work_list.front();
+      
+      work_list.pop_front();
+      
+      for (set<BasicBlock *>::iterator frontier = block->dom_frontier.begin(); frontier != block->dom_frontier.end(); ++frontier)
+      {
+        if ( (*frontier)->add_phi(*var) )
+        {
+          work_list.push_back(*frontier);
+        }
+      }
+    }
+  }
+  
 }
+
+void full_ssa(CFG *cfg)
+{
+  dom_tree(cfg);
+  dom_frontier(cfg);
+  find_globals_and_add_phis(cfg);
+}
+
+/*  
+  dom_tree(program.cfgs[1]);
+
+  cout << "=== dom_tree ===" << endl;
+  for (vector<BasicBlock *>::iterator block = cfg->blocks.begin(); block != cfg->blocks.end(); ++block)
+  {
+    cout << (*block)->name() << ": " << endl;
+    for(vector<BasicBlock *>::iterator child = (*block)->children.begin(); child != (*block)->children.end(); ++child)
+    {
+      cout << "  " << (*child)->index << endl;
+    }
+  }
+  
+  dom_frontier(program.cfgs[1]);
+  
+  cout << "=== dom_frontier ===" << endl;
+  for (vector<BasicBlock *>::iterator block = cfg->blocks.begin(); block != cfg->blocks.end(); ++block)
+  {
+    cout << (*block)->name() << ": " << endl;
+    for(set<BasicBlock *>::iterator df = (*block)->dom_frontier.begin(); df != (*block)->dom_frontier.end(); ++df)
+    {
+      cout << "  " << (*df)->index << endl;
+    }
+  }
+  
+  cout << "=== vars ===" << endl;
+  for (vector<BasicBlock *>::iterator block = cfg->blocks.begin(); block != cfg->blocks.end(); ++block)
+  {
+    cout << (*block)->name() << ": " << endl;
+    for(set<TACVar *>::iterator var = (*block)->vars.begin(); var != (*block)->vars.end(); ++var)
+    {
+      cout << "  " << **var << endl;
+    }
+  }
+*/
