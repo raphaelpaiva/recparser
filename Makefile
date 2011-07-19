@@ -12,6 +12,8 @@ BIN = bin
 PARSER_DIR = parser
 CFG_DIR = cfg
 SSA_DIR = ssa
+UTIL_DIR = util
+TMP_DIR = tmp
 
 _C_OBJ = ast_pretty_printer.o driver.o  lex.yy.o symtab.o type_checker.o
 C_OBJ = $(patsubst %,$(OUT)/%,$(_C_OBJ))
@@ -46,12 +48,7 @@ mongac: $(C_OBJ) $(CXX_OBJ) $(OUT)/mongac.o
 	$(CXX) -o $(BIN)/$@ $^ $(CXX_FLAGS)
 
 clean:
-	rm -f *~
-	rm -f $(PARSER_DIR)/*~
-	rm -f $(CFG_DIR)/*~
-	rm -f $(OUT)/*.o
-	rm -f $(BIN)/*
-	rm -f mongac
+	rm -f *~ $(PARSER_DIR)/*~ $(CFG_DIR)/*~ $(SSA_DIR)/*~ $(OUT)/*.o $(BIN)/* $(UTIL_DIR)/*~ $(TMP_DIR)/*
 
 prepare:
 	mkdir -p $(OUT) $(BIN)
