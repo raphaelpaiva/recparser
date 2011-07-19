@@ -1,1 +1,1 @@
-gedit mongac.cpp ast/ast.h cfg/cfg_gen.cpp cfg/cfg.h cfg/cfg.cpp cfg/ast_utils.h cfg/ast_utils.cpp &
+gedit mongac.cpp ast/ast.h cfg/cfg.h cfg/cfg.cpp ssa/ssa.cpp ssa/ssa.h &
