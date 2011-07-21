@@ -85,7 +85,7 @@ string BasicBlock::str(int indent)
   
   ss << "  " << name() << ":" << endl;
   
-  for (map<TACVar *, vector<pair<TACVar *, BasicBlock *> > >::iterator phis_member = phis.begin(); phis_member != phis.end(); ++phis_member)
+  for (map<TACVar *, vector<pair<TACVar *, BasicBlock *> >, TACVarComparator>::iterator phis_member = phis.begin(); phis_member != phis.end(); ++phis_member)
   {
     ss << spaces << *(*phis_member).first << " <- " << "phi( ";
     

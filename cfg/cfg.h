@@ -29,7 +29,7 @@ class BasicBlock {
     
     set<BasicBlock *> dom_frontier;
     
-    set<TACVar *> vars;
+    set<TACVar *, TACVarComparator> vars;
     
     map<TACVar *, vector< pair<TACVar *, BasicBlock *> > > phis;
     

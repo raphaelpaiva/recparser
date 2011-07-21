@@ -30,14 +30,16 @@ class TACVar : public TACMember {
       ss << paramName << temp_index;
       name = ss.str();
     };
+    TACVar(TACVar *old_var) : TACMember(old_var->name), index(0) { };
     
     string str();
 };
 
-struct TACVarComparator {
-  bool operator() (TACVar *v1, TACVar *v2) {
-    return v1->name < v2->name;
-  }
+class TACVarComparator {
+  public:
+    bool operator() (TACVar *v1, TACVar *v2) {
+      return v1->name < v2->name;
+    }
 };
 
 template<class T>

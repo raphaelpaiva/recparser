@@ -67,12 +67,14 @@ TACMember *gen_attr_binop(TACVar *target, Exp *ast_expression, CFG *cfg)
     target = gen_temp();
   }
   
-  Operation *operation = new TACAttr(target, left, op, right);
+  TACVar *new_target = new TACVar(target);
+  
+  Operation *operation = new TACAttr(new_target, left, op, right);
   
   cfg->work_block->ops.push_back(operation);
-  cfg->work_block->vars.insert(target);
+  cfg->work_block->vars.insert(new_target);
   
-  return target;
+  return new_target;
 }
 
 TACMember *gen_short_circuit(TACVar *target, Exp *ast_expression, CFG *cfg)
@@ -90,20 +92,22 @@ TACMember *gen_short_circuit(TACVar *target, Exp *ast_expression, CFG *cfg)
       target = gen_temp();
     }
     
-    gen_operations(target, ast_expression->u.binop.e1, cfg);
+    TACVar *new_target = new TACVar(target);
+    
+    gen_operations(new_target, ast_expression->u.binop.e1, cfg);
     
     new_block = gen_basic_block(cfg);
     BasicBlock *final = gen_basic_block(cfg);
     
-    cfg->work_block->brc(target, new_block, final);
+    cfg->work_block->brc(new_target, new_block, final);
     cfg->work_block = new_block;
     
-    gen_operations(target, ast_expression->u.binop.e2, cfg);
+    gen_operations(new_target, ast_expression->u.binop.e2, cfg);
     
     cfg->work_block->br(final);
     cfg->work_block = final;
     
-    return target;
+    return new_target;
   }
   else
   {
@@ -118,20 +122,22 @@ TACMember *gen_short_circuit(TACVar *target, Exp *ast_expression, CFG *cfg)
       target = gen_temp();
     }
     
-    gen_operations(target, ast_expression->u.binop.e1, cfg);
+    TACVar *new_target = new TACVar(target);
+    
+    gen_operations(new_target, ast_expression->u.binop.e1, cfg);
     
     new_block = gen_basic_block(cfg);
     BasicBlock *final = gen_basic_block(cfg);
     
-    cfg->work_block->brc(target, final, new_block);
+    cfg->work_block->brc(new_target, final, new_block);
     cfg->work_block = new_block;
     
-    gen_operations(target, ast_expression->u.binop.e2, cfg);
+    gen_operations(new_target, ast_expression->u.binop.e2, cfg);
     
     cfg->work_block->br(final);
     cfg->work_block = final;
     
-    return target;
+    return new_target;
   }
 }
 
@@ -166,9 +172,10 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
       
       if (target != NULL)
       {
-        Operation *operation = new TACAttr(target, literal);
+        TACVar *new_target = new TACVar(target);
+        Operation *operation = new TACAttr(new_target, literal);
         cfg->work_block->ops.push_back(operation);
-        cfg->work_block->vars.insert(target);
+        cfg->work_block->vars.insert(new_target);
       }
       
       return literal;
@@ -179,9 +186,10 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
       
       if (target != NULL)
       {
-        Operation *operation = new TACAttr(target, var);
+        TACVar *new_target = new TACVar(target);
+        Operation *operation = new TACAttr(new_target, var);
         cfg->work_block->ops.push_back(operation);
-        cfg->work_block->vars.insert(target);
+        cfg->work_block->vars.insert(new_target);
       }
       
       return var;
@@ -212,12 +220,14 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
         target = gen_temp();
       }
       
-      Operation *attr = new TACAttr(target, funcall);
+      TACVar *new_target = new TACVar(target);
+      
+      Operation *attr = new TACAttr(new_target, funcall);
       
       cfg->work_block->ops.push_back(attr);
-      cfg->work_block->vars.insert(target);
+      cfg->work_block->vars.insert(new_target);
       
-      return target;
+      return new_target;
       break;
     }
     case EXP_NEG : {
@@ -230,12 +240,14 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
         target = gen_temp();
       }
       
-      Operation *attr = new TACAttr(target, zero, '-', neg);
+      TACVar *new_target = new TACVar(target);
+      
+      Operation *attr = new TACAttr(new_target, zero, '-', neg);
       
       cfg->work_block->ops.push_back(attr);
-      cfg->work_block->vars.insert(target);
+      cfg->work_block->vars.insert(new_target);
       
-      return target;
+      return new_target;
       break;
     }
     case EXP_STRING: {
@@ -248,12 +260,14 @@ TACMember *gen_operations(TACVar *target, Exp *ast_expression, CFG *cfg)
         target = gen_temp();
       }
       
-      Operation *attr = new TACAttr(target, global);
+      TACVar *new_target = new TACVar(target);
+      
+      Operation *attr = new TACAttr(new_target, global);
       
       cfg->work_block->ops.push_back(attr);
-      cfg->work_block->vars.insert(target);
+      cfg->work_block->vars.insert(new_target);
       
-      return target;
+      return new_target;
       break;
     }
     default: {

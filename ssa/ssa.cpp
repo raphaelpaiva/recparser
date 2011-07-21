@@ -6,9 +6,9 @@
 #include "ssa.h"
 #include "../cfg/branch_operations.h"
 
-void find_global_funcall_params(vector<TACMember *>& params, set<TACVar *, TACVarComparator>& globals, map<TACVar *, set<BasicBlock *>, TACVarComparator>& blocks, set<TACVar *, TACVarComparator>& locals);
+void find_global_funcall_params(vector<TACMember *>& params, set<TACVar *, TACVarComparator>& globals, map<string, set<BasicBlock *> >& blocks, set<string>& locals);
 
-void ssa_name_funcall_params(vector<TACMember *>& params, map<TACVar *, vector<int> >& stack);
+void ssa_name_funcall_params(vector<TACMember *>& params, map<string, vector<int> >& stack);
 
 template<class T, class U, class Comparator>
 bool map_contains(map<T, U, Comparator> m, T t)
@@ -146,12 +146,12 @@ TACVar *retrieve_operand(Operation *op)
   return NULL;
 }
 
-void find_global_var(TACVar *var, set<TACVar *, TACVarComparator>& globals, map<TACVar *, set<BasicBlock *>, TACVarComparator>& blocks, set<TACVar *, TACVarComparator>& locals)
+void find_global_var(TACVar *var, set<TACVar *, TACVarComparator>& globals, map<string, set<BasicBlock *> >& blocks, set<string>& locals)
 {
   if (var != NULL)
   {
-    bool blocks_contains_var = map_contains<TACVar *, set<BasicBlock *>, TACVarComparator>(blocks, var);
-    bool locals_contains_var = set_contains<TACVar *, TACVarComparator>(locals, var);
+    bool blocks_contains_var = map_contains<string, set<BasicBlock *> >(blocks, var->name);
+    bool locals_contains_var = set_contains<string>(locals, var->name);
     
     if (blocks_contains_var && !locals_contains_var)
     {
@@ -161,7 +161,7 @@ void find_global_var(TACVar *var, set<TACVar *, TACVarComparator>& globals, map<
   }
 }
 
-void find_global_member(TACMember *member, set<TACVar *, TACVarComparator>& globals, map<TACVar *, set<BasicBlock *>, TACVarComparator>& blocks, set<TACVar *, TACVarComparator>& locals)
+void find_global_member(TACMember *member, set<TACVar *, TACVarComparator>& globals, map<string, set<BasicBlock *> >& blocks, set<string>& locals)
 {
   TACVar *var = dynamic_cast<TACVar *>(member);
   
@@ -180,7 +180,7 @@ void find_global_member(TACMember *member, set<TACVar *, TACVarComparator>& glob
   }
 }
 
-void find_global_funcall_params(vector<TACMember *>& params, set<TACVar *, TACVarComparator>& globals, map<TACVar *, set<BasicBlock *>, TACVarComparator>& blocks, set<TACVar *, TACVarComparator>& locals)
+void find_global_funcall_params(vector<TACMember *>& params, set<TACVar *, TACVarComparator>& globals, map<string, set<BasicBlock *> >& blocks, set<string>& locals)
 {
   for (vector<TACMember *>::iterator param = params.begin(); param != params.end(); ++param)
   {
@@ -191,22 +191,22 @@ void find_global_funcall_params(vector<TACMember *>& params, set<TACVar *, TACVa
 void find_globals_and_add_phis(CFG *cfg)
 {
   set<TACVar *, TACVarComparator> globals;
-  map<TACVar *, set<BasicBlock *>, TACVarComparator> blocks;
+  map<string, set<BasicBlock *> > blocks;
   
   for (vector<BasicBlock *>::iterator block = cfg->blocks.begin(); block != cfg->blocks.end(); ++block)
   {
-    for (set<TACVar *>::iterator var = (*block)->vars.begin(); var != (*block)->vars.end(); ++var)
+    for (set<TACVar *, TACVarComparator>::iterator var = (*block)->vars.begin(); var != (*block)->vars.end(); ++var)
     {
-      if (!map_contains<TACVar *, set<BasicBlock *> >(blocks, (*var)))
+      if (!map_contains<string, set<BasicBlock *> >(blocks, (*var)->name))
       {
-        blocks[(*var)];
+        blocks[(*var)->name];
       }
     }
   }
 
   for (vector<BasicBlock *>::iterator block = cfg->blocks.begin(); block != cfg->blocks.end(); ++block)
   {
-    set<TACVar *, TACVarComparator> locals;
+    set<string> locals;
     
     for (int i = 0; i < (*block)->ops.size(); ++i)
     {
@@ -217,7 +217,7 @@ void find_globals_and_add_phis(CFG *cfg)
         TACVar *var = retrieve_operand(op);
         if (var != NULL)
         {
-          if (map_contains<TACVar *, set<BasicBlock *>, TACVarComparator>(blocks, var) && !set_contains<TACVar *, TACVarComparator>(locals, var))
+          if (map_contains<string, set<BasicBlock *> >(blocks, var->name) && !set_contains<string>(locals, var->name))
           {
             globals.insert(var);
           }
@@ -233,8 +233,8 @@ void find_globals_and_add_phis(CFG *cfg)
           find_global_member(attr->left, globals, blocks, locals);
           find_global_member(attr->right, globals, blocks, locals);
 
-          locals.insert(attr->target);
-          blocks[attr->target].insert((*block));
+          locals.insert(attr->target->name);
+          blocks[attr->target->name].insert((*block));
         }
       }
       
@@ -258,7 +258,7 @@ void find_globals_and_add_phis(CFG *cfg)
   
   for (set<TACVar *>::iterator var = globals.begin(); var != globals.end(); ++var)
   {
-    list<BasicBlock *> work_list(blocks[*var].begin(), blocks[*var].end());
+    list<BasicBlock *> work_list(blocks[(*var)->name].begin(), blocks[(*var)->name].end());
     
     while (work_list.size() > 0)
     {
@@ -278,32 +278,36 @@ void find_globals_and_add_phis(CFG *cfg)
   
 }
 
-TACVar *new_name(TACVar *var, map<TACVar *, int>& counter, map<TACVar *, vector<int> >& stack)
+TACVar *new_name(TACVar *var, map<string, int>& counter, map<string, vector<int> >& stack)
 {
-  int i = counter[var];
-  counter[var]++;
-  stack[var].push_back(i);
+  int i = counter[var->name];
+  counter[var->name]++;
+  stack[var->name].push_back(i);
   
   var->index = i;
+  
+  cout << "new_name(): " << *var << endl;
   
   return var;
 }
 
-void ssa_name_var(TACVar *var, map<TACVar *, vector<int> >& stack)
+void ssa_name_var(TACVar *var, map<string, vector<int> >& stack)
 {
   if (var != NULL)
   {
-    cout << "before ssa_name(): " << *var << " in " << var << endl;
+    cout << "ssa_name(): " << *var << " in " << var;
     
-    if (stack[var].size() > 0)
+    if (stack[var->name].size() > 0)
     {
-      var->index = stack[var][0];
-      cout << "after ssa_name(): " << *var << " in " << var << endl;
+      var->index = stack[var->name][0];
+      cout << " -> " << *var;
     }
+    
+    cout << endl;
   }
 }
 
-void ssa_name_member(TACMember *member, map<TACVar *, vector<int> >& stack)
+void ssa_name_member(TACMember *member, map<string, vector<int> >& stack)
 {
   TACVar *var = dynamic_cast<TACVar *>(member);
   
@@ -323,7 +327,7 @@ void ssa_name_member(TACMember *member, map<TACVar *, vector<int> >& stack)
 }
 
 
-void ssa_name_funcall_params(vector<TACMember *>& params, map<TACVar *, vector<int> >& stack)
+void ssa_name_funcall_params(vector<TACMember *>& params, map<string, vector<int> >& stack)
 {
   for (vector<TACMember *>::iterator param = params.begin(); param != params.end(); ++param)
   {
@@ -331,7 +335,7 @@ void ssa_name_funcall_params(vector<TACMember *>& params, map<TACVar *, vector<i
   }
 }
 
-void rename(BasicBlock *block, map<TACVar *, int>& counter, map<TACVar *, vector<int> >& stack)
+void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int> >& stack)
 {
   for (map<TACVar *, vector< pair<TACVar *, BasicBlock *> > >::iterator it = block->phis.begin(); it != block->phis.end(); ++it)
   {
@@ -348,6 +352,7 @@ void rename(BasicBlock *block, map<TACVar *, int>& counter, map<TACVar *, vector
   for (int i = 0; i < block->ops.size(); ++i)
   {
     Operation *op = block->ops[i];
+    cout << "Parsing Operation: " << *op << " " << endl;
     if (!is_type_operation<TACAttr>(op))
     {
       TACVar *var = retrieve_operand(op);
@@ -385,11 +390,11 @@ void rename(BasicBlock *block, map<TACVar *, int>& counter, map<TACVar *, vector
       {
         if ((*pair).second->index == block->index)
         {
-          if(stack[(*pair).first].size() == 0)
+          if(stack[(*pair).first->name].size() == 0)
           {
-            stack[(*pair).first].push_back(0);
+            stack[(*pair).first->name].push_back(0);
             
-            counter[(*pair).first]++;
+            counter[(*pair).first->name]++;
           }
           
           ssa_name_var((*pair).first, stack);
@@ -412,34 +417,34 @@ void rename(BasicBlock *block, map<TACVar *, int>& counter, map<TACVar *, vector
       
     //  cout << "attr: " << *attr << endl;
      // cout << "stack[attr->target].size() " << stack[attr->target].size() << endl;
-      stack[attr->target].pop_back();
+      stack[attr->target->name].pop_back();
     }
   }
   
   for (map<TACVar *, vector< pair<TACVar *, BasicBlock *> > >::iterator it = block->phis.begin(); it != block->phis.end(); ++it)
   {
     cout << "(*it).first = " << *(*it).first << endl;
-    cout << "stack[(*it).first].size() = " << stack[(*it).first].size() << endl;
-    stack[(*it).first].pop_back();
+    cout << "stack[(*it).first].size() = " << stack[(*it).first->name].size() << endl;
+    stack[(*it).first->name].pop_back();
   }
 }
 
 void ssa_rename(CFG *cfg)
 {
-  map<TACVar *, int> counter;
-  map<TACVar *, vector<int> > stack;
+  map<string, int> counter;
+  map<string, vector<int> > stack;
   
   for (vector<BasicBlock *>::iterator block = cfg->blocks.begin(); block != cfg->blocks.end(); ++block)
   {
     for (set<TACVar *>::iterator var = (*block)->vars.begin(); var != (*block)->vars.end(); ++var)
     {
-      if (counter.count(*var) == 0)
+      if (counter.count((*var)->name) == 0)
       {
-        counter[*var] = 0;
+        counter[(*var)->name] = 0;
       }
-      if (stack.count(*var) == 0)
+      if (stack.count((*var)->name) == 0)
       {
-        stack[*var];
+        stack[(*var)->name];
       }
     }
   }
