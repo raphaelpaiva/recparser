@@ -14,7 +14,7 @@ bool BasicBlock::add_phi(TACVar *var)
     
     for (vector<BasicBlock *>::iterator block = preds.begin(); block != preds.end(); ++block)
     {
-      pair<TACVar *, BasicBlock *> pair(var, *block);
+      pair<TACVar *, BasicBlock *> pair(new TACVar(var), *block);
       
       pairs.push_back(pair);
     }
@@ -93,7 +93,7 @@ string BasicBlock::str(int indent)
     
     for (vector<pair<TACVar *, BasicBlock *> >::iterator phi = phis_vector.begin(); phi != phis_vector.end(); ++phi )
     {
-      ss << *(*phi).first << ", " << (*phi).second->name() << ", "; 
+      ss << *(*phi).first << " in " << (*phi).first << ", " << (*phi).second->name() << ", "; 
     }
     
     long pos = ss.tellp();

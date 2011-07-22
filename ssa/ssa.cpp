@@ -286,7 +286,7 @@ TACVar *new_name(TACVar *var, map<string, int>& counter, map<string, vector<int>
   
   var->index = i;
   
-  cout << "new_name(): " << *var << endl;
+  cout << "new_name(): " << *var << " in " << &var << endl;
   
   return var;
 }
@@ -380,6 +380,18 @@ void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int
       }
   }
   
+  /*
+    for succ in b.succs:
+        for var in succ.phis.keys():
+            pairs = succ.phis[var]
+            for pair in pairs:
+                if pair[1] == b:
+                    if len(stack[pair[0]]) == 0:
+                        stack[pair[0]].append(0)
+                        counter[pair[0]] += 1
+                    pair[0] = ssa_name(pair[0], stack[pair[0]][-1])
+  */
+  
   for (vector<BasicBlock *>::iterator succ = block->succs.begin(); succ != block->succs.end(); ++succ)
   {
     for (map<TACVar *, vector< pair<TACVar *, BasicBlock *> > >::iterator it = (*succ)->phis.begin(); it != (*succ)->phis.end(); ++it)
@@ -397,6 +409,7 @@ void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int
             counter[(*pair).first->name]++;
           }
           
+          cout << "phi: " << endl;
           ssa_name_var((*pair).first, stack);
         }
       }
