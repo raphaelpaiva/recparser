@@ -93,7 +93,7 @@ string BasicBlock::str(int indent)
     
     for (vector<pair<TACVar *, BasicBlock *> >::iterator phi = phis_vector.begin(); phi != phis_vector.end(); ++phi )
     {
-      ss << *(*phi).first << " in " << (*phi).first << ", " << (*phi).second->name() << ", "; 
+      ss << *(*phi).first << ", " << (*phi).second->name() << ", "; 
     }
     
     long pos = ss.tellp();
