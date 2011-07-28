@@ -250,12 +250,6 @@ void find_globals_and_add_phis(CFG *cfg)
     }
   }
   
-  cout << "=== globals === " << endl;
-  for (set<TACVar *>::iterator var = globals.begin(); var != globals.end(); ++var)
-  {
-    cout << **var << endl;
-  }
-  
   for (set<TACVar *>::iterator var = globals.begin(); var != globals.end(); ++var)
   {
     list<BasicBlock *> work_list(blocks[(*var)->name].begin(), blocks[(*var)->name].end());
@@ -286,8 +280,6 @@ TACVar *new_name(TACVar *var, map<string, int>& counter, map<string, vector<int>
   
   var->index = i;
   
-  cout << "new_name(): " << *var << " in " << &var << endl;
-  
   return var;
 }
 
@@ -295,12 +287,9 @@ void ssa_name_var(TACVar *var, map<string, vector<int> >& stack)
 {
   if (var != NULL)
   {
-    cout << "ssa_name(): " << *var << " in " << var;
-    
     if (stack[var->name].size() > 0)
     {
       var->index = stack[var->name][0];
-      cout << " -> " << *var;
     }
     
     cout << endl;
@@ -352,7 +341,6 @@ void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int
   for (int i = 0; i < block->ops.size(); ++i)
   {
     Operation *op = block->ops[i];
-    cout << "Parsing Operation: " << *op << " " << endl;
     if (!is_type_operation<TACAttr>(op))
     {
       TACVar *var = retrieve_operand(op);
@@ -409,7 +397,6 @@ void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int
             counter[(*pair).first->name]++;
           }
           
-          cout << "phi: " << endl;
           ssa_name_var((*pair).first, stack);
         }
       }
@@ -428,16 +415,12 @@ void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int
     {
       TACAttr *attr = dynamic_cast<TACAttr *>(op);
       
-    //  cout << "attr: " << *attr << endl;
-     // cout << "stack[attr->target].size() " << stack[attr->target].size() << endl;
       stack[attr->target->name].pop_back();
     }
   }
   
   for (map<TACVar *, vector< pair<TACVar *, BasicBlock *> > >::iterator it = block->phis.begin(); it != block->phis.end(); ++it)
   {
-    cout << "(*it).first = " << *(*it).first << endl;
-    cout << "stack[(*it).first].size() = " << stack[(*it).first->name].size() << endl;
     stack[(*it).first->name].pop_back();
   }
 }
@@ -473,38 +456,3 @@ void full_ssa(CFG *cfg)
   ssa_rename(cfg);
 }
 
-/*  
-  dom_tree(program.cfgs[1]);
-
-  cout << "=== dom_tree ===" << endl;
-  for (vector<BasicBlock *>::iterator block = cfg->blocks.begin(); block != cfg->blocks.end(); ++block)
-  {
-    cout << (*block)->name() << ": " << endl;
-    for(vector<BasicBlock *>::iterator child = (*block)->children.begin(); child != (*block)->children.end(); ++child)
-    {
-      cout << "  " << (*child)->index << endl;
-    }
-  }
-  
-  dom_frontier(program.cfgs[1]);
-  
-  cout << "=== dom_frontier ===" << endl;
-  for (vector<BasicBlock *>::iterator block = cfg->blocks.begin(); block != cfg->blocks.end(); ++block)
-  {
-    cout << (*block)->name() << ": " << endl;
-    for(set<BasicBlock *>::iterator df = (*block)->dom_frontier.begin(); df != (*block)->dom_frontier.end(); ++df)
-    {
-      cout << "  " << (*df)->index << endl;
-    }
-  }
-  
-  cout << "=== vars ===" << endl;
-  for (vector<BasicBlock *>::iterator block = cfg->blocks.begin(); block != cfg->blocks.end(); ++block)
-  {
-    cout << (*block)->name() << ": " << endl;
-    for(set<TACVar *>::iterator var = (*block)->vars.begin(); var != (*block)->vars.end(); ++var)
-    {
-      cout << "  " << **var << endl;
-    }
-  }
-*/
