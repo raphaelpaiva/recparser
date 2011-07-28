@@ -91,7 +91,7 @@ void dom_tree(CFG* cfg)
       block->idom = intersect(block->preds[0], block->preds[1]);
       block->idom->children.push_back(block);
     }
-    else
+    else if (!block->preds.empty())
     {
       block->idom = block->preds[0];
       block->idom->children.push_back(block);

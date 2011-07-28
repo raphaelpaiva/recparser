@@ -27,7 +27,10 @@ int main(int argc, char **argv)
   
   cout << program;
   
-  full_ssa(program.cfgs[1]);
+  for (vector<CFG *>::iterator cfg = program.cfgs.begin(); cfg != program.cfgs.end(); ++cfg)
+  {
+    full_ssa(*cfg);
+  }
   
   cout << program;
   
