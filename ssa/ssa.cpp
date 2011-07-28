@@ -1,5 +1,4 @@
 #include <map>
-#include <iostream>
 #include <algorithm>
 #include <list>
 #include <stack>
@@ -291,8 +290,6 @@ void ssa_name_var(TACVar *var, map<string, vector<int> >& stack)
     {
       var->index = stack[var->name][0];
     }
-    
-    cout << endl;
   }
 }
 
@@ -367,18 +364,6 @@ void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int
         ssa_name_funcall_params(funcall->funcall->params, stack);
       }
   }
-  
-  /*
-    for succ in b.succs:
-        for var in succ.phis.keys():
-            pairs = succ.phis[var]
-            for pair in pairs:
-                if pair[1] == b:
-                    if len(stack[pair[0]]) == 0:
-                        stack[pair[0]].append(0)
-                        counter[pair[0]] += 1
-                    pair[0] = ssa_name(pair[0], stack[pair[0]][-1])
-  */
   
   for (vector<BasicBlock *>::iterator succ = block->succs.begin(); succ != block->succs.end(); ++succ)
   {
