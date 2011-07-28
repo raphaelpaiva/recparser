@@ -1,3 +1,4 @@
+#include <iostream>
 #include <map>
 #include <algorithm>
 #include <list>
@@ -154,7 +155,7 @@ void find_global_var(TACVar *var, set<TACVar *, TACVarComparator>& globals, map<
     
     if (blocks_contains_var && !locals_contains_var)
     {
-      globals.insert(var);
+      globals.insert(new TACVar(var));
     }
     
   }
@@ -218,7 +219,7 @@ void find_globals_and_add_phis(CFG *cfg)
         {
           if (map_contains<string, set<BasicBlock *> >(blocks, var->name) && !set_contains<string>(locals, var->name))
           {
-            globals.insert(var);
+            globals.insert(new TACVar(var));
           }
         }
       }
@@ -288,7 +289,7 @@ void ssa_name_var(TACVar *var, map<string, vector<int> >& stack)
   {
     if (stack[var->name].size() > 0)
     {
-      var->index = stack[var->name][0];
+      var->index = stack[var->name].back();
     }
   }
 }
@@ -323,6 +324,7 @@ void ssa_name_funcall_params(vector<TACMember *>& params, map<string, vector<int
 
 void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int> >& stack)
 {
+  cout << "rename: " << block->name() << endl;
   for (map<TACVar *, vector< pair<TACVar *, BasicBlock *> > >::iterator it = block->phis.begin(); it != block->phis.end(); ++it)
   {
     TACVar *var = (*it).first;
@@ -351,8 +353,12 @@ void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int
     if (is_type_operation<TACAttr>(op))
     {
       TACAttr *attr = dynamic_cast<TACAttr *>(op);
+      
+      cout << *attr << endl;
       ssa_name_member(attr->left, stack);
       ssa_name_member(attr->right, stack);
+      
+      cout << *attr << endl;      
         
       attr->target = new_name(attr->target, counter, stack);
     }
@@ -390,6 +396,7 @@ void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int
   
   for(vector<BasicBlock *>::iterator child = block->children.begin(); child != block->children.end(); ++child)
   {
+    cout << "rename() " << (*child)->name() << "from " << block->name() << endl;
     rename(*child, counter, stack);
   }
   

@@ -25,19 +25,25 @@ int main(int argc, char **argv)
   print_declrlist(0, ast);
 
   Prog program = gen_prog(ast);
-  
+
+  cout << "=== program ===" << endl;
+  cout << program;
   for (vector<CFG *>::iterator cfg = program.cfgs.begin(); cfg != program.cfgs.end(); ++cfg)
   {
     full_ssa(*cfg);
   }
   
+  cout << "=== ssa ===" << endl;
+  cout << program;
+  
   for (vector<CFG *>::iterator cfg = program.cfgs.begin(); cfg != program.cfgs.end(); ++cfg)
   {
     remove_move_operations(*cfg);
   }
-  
+
+  cout << "=== rm_moves ===" << endl;
   cout << program;
-  
+    
   return 0;
 }
 
