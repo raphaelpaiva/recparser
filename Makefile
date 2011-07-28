@@ -18,7 +18,7 @@ TMP_DIR = tmp
 _C_OBJ = ast_pretty_printer.o driver.o  lex.yy.o symtab.o type_checker.o
 C_OBJ = $(patsubst %,$(OUT)/%,$(_C_OBJ))
 
-_CXX_OBJ = TAC.o operations.o branch_operations.o cfg.o cfg_gen.o ast_utils.o ssa.o
+_CXX_OBJ = TAC.o operations.o branch_operations.o cfg.o cfg_gen.o ast_utils.o ssa.o rm_movs.o
 CXX_OBJ = $(patsubst %,$(OUT)/%,$(_CXX_OBJ))
 
 all: prepare mongac

@@ -3,6 +3,7 @@
 #include <vector>
 #include "cfg/cfg_gen.h"
 #include "ssa/ssa.h"
+#include "ssa/rm_movs.h"
 
 extern "C" {
         #include "parser/driver.h"
@@ -20,12 +21,19 @@ int main(int argc, char **argv)
   ast = read_ast(argc, argv);
 
   check_prog(ast);
+  
+  print_declrlist(0, ast);
 
   Prog program = gen_prog(ast);
   
   for (vector<CFG *>::iterator cfg = program.cfgs.begin(); cfg != program.cfgs.end(); ++cfg)
   {
     full_ssa(*cfg);
+  }
+  
+  for (vector<CFG *>::iterator cfg = program.cfgs.begin(); cfg != program.cfgs.end(); ++cfg)
+  {
+    remove_move_operations(*cfg);
   }
   
   cout << program;
