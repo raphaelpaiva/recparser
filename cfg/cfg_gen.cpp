@@ -398,9 +398,40 @@ void parse_ast_commands(CommListNode *ast_commands, CFG *cfg)
   }
 }
 
+string gen_cfg_name(string name, DeclrListNode *ast_params)
+{
+  if(ast_params == NULL)
+  {
+    return name + "()";
+  }
+  
+  stringstream ss;
+  
+  ss << name << "(";
+  
+  DeclrListNode *curr = ast_params;
+  
+  while(curr != NULL)
+  {
+    Declr *declr = curr->declr;
+    
+    ss << "i32 %" << declr->u.name << "_" << declr << ".0" << ", ";
+    
+    curr = curr->next;
+  }
+  
+  long pos = ss.tellp();
+    
+  ss.seekp(pos - 2);
+  
+  ss << ")";
+  
+  return ss.str();
+}
+
 CFG *gen_cfg(Declr *ast_declr)
 {
-  CFG *cfg = new CFG(ast_declr->u.name);
+  CFG *cfg = new CFG(gen_cfg_name(ast_declr->u.name, ast_declr->u.func.params));
   
   BasicBlock *block = gen_basic_block(cfg);
   cfg->work_block = block;

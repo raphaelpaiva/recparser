@@ -31,12 +31,12 @@ string TACFuncall::str()
 {
   if (params.size() == 0)
   {
-    return "call i32 " + name + "()";
+    return "call i32 @" + name + "()";
   }
   
   stringstream ss;
   
-  ss << "call i32 " << name << '(';
+  ss << "call i32 @" << name << '(';
   
   for (vector<TACMember *>::iterator it = params.begin(); it != params.end(); ++it)
   {

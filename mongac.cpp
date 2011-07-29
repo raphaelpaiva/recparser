@@ -22,8 +22,6 @@ int main(int argc, char **argv)
 
   check_prog(ast);
   
-  print_declrlist(0, ast);
-
   Prog program = gen_prog(ast);
 
   for (vector<CFG *>::iterator cfg = program.cfgs.begin(); cfg != program.cfgs.end(); ++cfg)

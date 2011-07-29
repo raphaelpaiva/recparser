@@ -19,27 +19,27 @@ string retrieve_operation_string(int op)
   switch(op)
   {
     case TK_EQ: {
-      ss << "eq";
+      ss << "icmp eq";
       break;
     }
     case TK_LEQ: {
-      ss << "sle";
+      ss << "icmp sle";
       break;
     }
     case TK_NEQ: {
-      ss << "ne";
+      ss << "icmp ne";
       break;
     }
     case TK_GEQ: {
-      ss << "sge";
+      ss << "icmp sge";
       break;
     }
     case '>': {
-      ss << "sgt";
+      ss << "icmp sgt";
       break;
     }
     case '<': {
-      ss << "slt";
+      ss << "icmp slt";
       break;
     }
     case '+': {

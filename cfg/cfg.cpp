@@ -75,6 +75,11 @@ string BasicBlock::name()
 
 string BasicBlock::str(int indent)
 {
+  if (ops.empty())
+  {
+    return "";
+  }
+
   stringstream ss;
   string spaces;
   
