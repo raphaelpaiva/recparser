@@ -1,4 +1,3 @@
-#include <iostream>
 #include <string>
 #include <vector>
 #include <map>
@@ -16,8 +15,6 @@ vector<TACMember *> remove_move_funcall_params(vector<TACMember *> params, map<s
   
     entry = replace_operations.find( (*param)->str() );
 
-    cout << "param: " << (*param)->str() << endl;
-    
     if (entry != replace_operations.end())
     {
       new_params.push_back((*entry).second);
