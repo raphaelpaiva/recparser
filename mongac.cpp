@@ -26,8 +26,6 @@ int main(int argc, char **argv)
 
   Prog program = gen_prog(ast);
 
-  cout << "=== program ===" << endl;
-  cout << program;
   for (vector<CFG *>::iterator cfg = program.cfgs.begin(); cfg != program.cfgs.end(); ++cfg)
   {
     full_ssa(*cfg);

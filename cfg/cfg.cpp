@@ -10,11 +10,11 @@ bool BasicBlock::add_phi(TACVar *var)
 {
   if (phis.count(var) == 0)
   {
-    vector<pair<TACVar *, BasicBlock *> > pairs;
+    vector<pair<TACMember *, BasicBlock *> > pairs;
     
     for (vector<BasicBlock *>::iterator block = preds.begin(); block != preds.end(); ++block)
     {
-      pair<TACVar *, BasicBlock *> pair(new TACVar(var), *block);
+      pair<TACMember *, BasicBlock *> pair(new TACVar(var), *block);
       
       pairs.push_back(pair);
     }
@@ -85,13 +85,13 @@ string BasicBlock::str(int indent)
   
   ss << "  " << name() << ":" << endl;
   
-  for (map<TACVar *, vector<pair<TACVar *, BasicBlock *> >, TACVarComparator>::iterator phis_member = phis.begin(); phis_member != phis.end(); ++phis_member)
+  for (map<TACVar *, vector<pair<TACMember *, BasicBlock *> >, TACVarComparator>::iterator phis_member = phis.begin(); phis_member != phis.end(); ++phis_member)
   {
     ss << spaces << *(*phis_member).first << " <- " << "phi( ";
     
-    vector<pair<TACVar *, BasicBlock *> > phis_vector = (*phis_member).second;
+    vector<pair<TACMember *, BasicBlock *> > phis_vector = (*phis_member).second;
     
-    for (vector<pair<TACVar *, BasicBlock *> >::iterator phi = phis_vector.begin(); phi != phis_vector.end(); ++phi )
+    for (vector<pair<TACMember *, BasicBlock *> >::iterator phi = phis_vector.begin(); phi != phis_vector.end(); ++phi )
     {
       ss << *(*phi).first << ", " << (*phi).second->name() << ", "; 
     }

@@ -1,4 +1,3 @@
-#include <iostream>
 #include <map>
 #include <algorithm>
 #include <list>
@@ -324,11 +323,10 @@ void ssa_name_funcall_params(vector<TACMember *>& params, map<string, vector<int
 
 void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int> >& stack)
 {
-  cout << "rename: " << block->name() << endl;
-  for (map<TACVar *, vector< pair<TACVar *, BasicBlock *> > >::iterator it = block->phis.begin(); it != block->phis.end(); ++it)
+  for (map<TACVar *, vector< pair<TACMember *, BasicBlock *> > >::iterator it = block->phis.begin(); it != block->phis.end(); ++it)
   {
     TACVar *var = (*it).first;
-    vector< pair<TACVar *, BasicBlock *> > pairs = (*it).second;
+    vector< pair<TACMember *, BasicBlock *> > pairs = (*it).second;
     
     block->phis.erase(var);
     
@@ -354,12 +352,9 @@ void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int
     {
       TACAttr *attr = dynamic_cast<TACAttr *>(op);
       
-      cout << *attr << endl;
       ssa_name_member(attr->left, stack);
       ssa_name_member(attr->right, stack);
       
-      cout << *attr << endl;      
-        
       attr->target = new_name(attr->target, counter, stack);
     }
     
@@ -373,11 +368,11 @@ void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int
   
   for (vector<BasicBlock *>::iterator succ = block->succs.begin(); succ != block->succs.end(); ++succ)
   {
-    for (map<TACVar *, vector< pair<TACVar *, BasicBlock *> > >::iterator it = (*succ)->phis.begin(); it != (*succ)->phis.end(); ++it)
+    for (map<TACVar *, vector< pair<TACMember *, BasicBlock *> > >::iterator it = (*succ)->phis.begin(); it != (*succ)->phis.end(); ++it)
     {
-      vector<pair<TACVar *, BasicBlock *> > pairs = (*it).second;
+      vector<pair<TACMember *, BasicBlock *> > pairs = (*it).second;
       
-      for(vector<pair<TACVar *, BasicBlock *> >::iterator pair = pairs.begin(); pair != pairs.end(); ++pair)
+      for(vector<pair<TACMember *, BasicBlock *> >::iterator pair = pairs.begin(); pair != pairs.end(); ++pair)
       {
         if ((*pair).second->index == block->index)
         {
@@ -388,7 +383,7 @@ void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int
             counter[(*pair).first->name]++;
           }
           
-          ssa_name_var((*pair).first, stack);
+          ssa_name_member((*pair).first, stack);
         }
       }
     }
@@ -396,7 +391,6 @@ void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int
   
   for(vector<BasicBlock *>::iterator child = block->children.begin(); child != block->children.end(); ++child)
   {
-    cout << "rename() " << (*child)->name() << "from " << block->name() << endl;
     rename(*child, counter, stack);
   }
   
@@ -411,7 +405,7 @@ void rename(BasicBlock *block, map<string, int>& counter, map<string, vector<int
     }
   }
   
-  for (map<TACVar *, vector< pair<TACVar *, BasicBlock *> > >::iterator it = block->phis.begin(); it != block->phis.end(); ++it)
+  for (map<TACVar *, vector< pair<TACMember *, BasicBlock *> > >::iterator it = block->phis.begin(); it != block->phis.end(); ++it)
   {
     stack[(*it).first->name].pop_back();
   }

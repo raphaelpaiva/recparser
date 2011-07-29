@@ -31,7 +31,7 @@ class BasicBlock {
     
     set<TACVar *, TACVarComparator> vars;
     
-    map<TACVar *, vector< pair<TACVar *, BasicBlock *> > > phis;
+    map<TACVar *, vector< pair<TACMember *, BasicBlock *> > > phis;
     
     BasicBlock() : index(last_index), has_return_operation(false), idom(NULL) { last_index++; };
 

@@ -6,6 +6,69 @@
 #include "../cfg/cfg.h"
 #include "../cfg/branch_operations.h"
 
+vector<TACMember *> remove_move_funcall_params(vector<TACMember *> params, map<string, TACMember *>& replace_operations)
+{
+  vector<TACMember *> new_params;
+  
+  for (vector<TACMember *>::iterator param = params.begin(); param != params.end(); ++param)
+  {
+    map<string, TACMember *>::iterator entry;
+  
+    entry = replace_operations.find( (*param)->str() );
+
+    cout << "param: " << (*param)->str() << endl;
+    
+    if (entry != replace_operations.end())
+    {
+      new_params.push_back((*entry).second);
+    }
+    else
+    {
+      new_params.push_back(*param);
+    }
+  }
+  
+  return new_params;
+}
+
+bool remove_move_member(TACMember *member, map<string, TACMember *>& replace_operations)
+{
+  if (member != NULL)
+  {
+    TACFuncall *funcall = dynamic_cast<TACFuncall *>(member);
+  
+    if (funcall != NULL)
+    {
+      funcall->params = remove_move_funcall_params(funcall->params, replace_operations);
+    }
+    else
+    {
+      map<string, TACMember *>::iterator entry;
+      entry = replace_operations.find(member->str());
+      
+      if (entry != replace_operations.end())
+      {
+        member = (*entry).second;
+        return true;
+      }
+    }
+  }
+  
+  return false;
+}
+
+void remove_move_funcall_operation(Operation *op, map<string, TACMember *>& replace_operations)
+{
+  Funcall *funcall = dynamic_cast<Funcall *>(op);
+  
+  if (funcall != NULL)
+  {
+    TACFuncall *tac_funcall = funcall->funcall;
+    
+    tac_funcall->params = remove_move_funcall_params(tac_funcall->params, replace_operations);
+  }
+}
+
 bool remove_move_attr_operation(Operation *op, map<string, TACMember *>& replace_operations)
 {
   bool remove_operation = false;
@@ -19,32 +82,26 @@ bool remove_move_attr_operation(Operation *op, map<string, TACMember *>& replace
     {
       string target_name = attr->target->str();
     
-      entry = replace_operations.find(attr->left->str());
-    
-      if (entry != replace_operations.end())
+      if (remove_move_member(attr->left, replace_operations))
       {
-        attr->left = (*entry).second;
         remove_operation = remove_move_attr_operation(op, replace_operations);
       }
       else
       {
-        replace_operations[target_name] = attr->left;
-        remove_operation = true;
+        TACFuncall *funcall = dynamic_cast<TACFuncall *>(attr->left);
+        
+        if (funcall == NULL)
+        {
+          replace_operations[target_name] = attr->left;
+          remove_operation = true;
+        }
       }
     }
     else
     {
-      entry = replace_operations.find(attr->left->str());
-      if (entry != replace_operations.end())
-      {
-        attr->left = (*entry).second;
-      }
+      remove_move_member(attr->left, replace_operations);
       
-      entry = replace_operations.find(attr->right->str());
-      if (entry != replace_operations.end())
-      {
-        attr->right = (*entry).second;
-      }
+      remove_move_member(attr->right, replace_operations);
     }
   }
   
@@ -58,12 +115,7 @@ bool remove_move_return_operation(Operation *op, map<string, TACMember *>& repla
   
   if (ret != NULL)
   {
-    entry = replace_operations.find(ret->value->str());
-    
-    if (entry != replace_operations.end())
-    {
-      ret->value = (*entry).second;
-    }
+    remove_move_member(ret->value, replace_operations);
   }
 }
 
@@ -83,6 +135,44 @@ void remove_move_branch_operation(Operation *op, map<string, TACMember *>& repla
   }
 }
 
+void remove_phi_operations(BasicBlock *block, map<string, TACMember *>& replace_operations)
+{
+  map<TACVar *, vector< pair<TACMember *, BasicBlock *> > > new_phis;
+  
+  for (vector<BasicBlock *>::iterator succ = block->succs.begin(); succ != block->succs.end(); ++succ)
+  {
+    for (map<TACVar *, vector< pair<TACMember *, BasicBlock *> > >::iterator it = (*succ)->phis.begin(); it != (*succ)->phis.end(); ++it)
+    {
+      vector<pair<TACMember *, BasicBlock *> > new_pairs;
+      
+      vector<pair<TACMember *, BasicBlock *> > pairs = (*it).second;
+      
+      for(vector<pair<TACMember *, BasicBlock *> >::iterator pair = pairs.begin(); pair != pairs.end(); ++pair)
+      {
+        map<string, TACMember *>::iterator entry;
+        
+        TACMember *var = (*pair).first;
+        
+        entry = replace_operations.find(var->str());
+        
+        if (entry != replace_operations.end())
+        {
+          new_pairs.push_back(make_pair((*entry).second, (*pair).second));
+        }
+        else
+        {
+          new_pairs.push_back(*pair);
+        }
+      }
+      
+      new_phis[(*it).first] = new_pairs;
+    }
+    
+    (*succ)->phis = new_phis;
+  }
+
+}
+
 void remove_move_operations(CFG *cfg)
 {
   map<string, TACMember *> replace_operations;
@@ -99,9 +189,12 @@ void remove_move_operations(CFG *cfg)
       
       remove_move_return_operation(*op, replace_operations);
       remove_move_branch_operation(*op, replace_operations);
+      remove_move_funcall_operation(*op, replace_operations);
       
       ++op;
     }
+    
+    remove_phi_operations(*block, replace_operations);
   }
 }
 
