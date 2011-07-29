@@ -87,20 +87,20 @@ string BasicBlock::str(int indent)
   
   for (map<TACVar *, vector<pair<TACMember *, BasicBlock *> >, TACVarComparator>::iterator phis_member = phis.begin(); phis_member != phis.end(); ++phis_member)
   {
-    ss << spaces << *(*phis_member).first << " <- " << "phi( ";
+    ss << spaces << *(*phis_member).first << " = " << "phi i32 ";
     
     vector<pair<TACMember *, BasicBlock *> > phis_vector = (*phis_member).second;
     
     for (vector<pair<TACMember *, BasicBlock *> >::iterator phi = phis_vector.begin(); phi != phis_vector.end(); ++phi )
     {
-      ss << *(*phi).first << ", " << (*phi).second->name() << ", "; 
+      ss << "[ " << *(*phi).first << ", " <<  "%" << (*phi).second->name() << " ], "; 
     }
     
     long pos = ss.tellp();
     
     ss.seekp(pos - 2);
-  
-    ss << " )" << endl;
+    
+    ss << endl;
   }
   
   for(vector<Operation *>::iterator it = ops.begin(); it != ops.end(); ++it )
@@ -120,12 +120,14 @@ string CFG::str()
 {
   stringstream ss;
   
-  ss << name << ":" << endl;
+  ss << "define i32 @" << name << " {" << endl;
   
   for(vector<BasicBlock *>::iterator it = blocks.begin(); it != blocks.end(); ++it )
   {
     ss << (*it)->str(2) << endl;
   }
+  
+  ss << "}";
   
   return ss.str();
 }

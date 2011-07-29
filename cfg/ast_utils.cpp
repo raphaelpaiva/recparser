@@ -42,11 +42,29 @@ string retrieve_operation_string(int op)
       ss << "slt";
       break;
     }
+    case '+': {
+      ss << "add";
+      break;
+    }
+    case '-': {
+      ss << "sub";
+      break;
+    }
+    case '*': {
+      ss << "mul";
+      break;
+    }
+    case '/': {
+      ss << "sdiv";
+      break;
+    }
     default: {
       ss << (char) op;
       break;
     }
   }
+  
+  ss << " i32";
   
   return ss.str();
 }

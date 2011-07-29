@@ -11,11 +11,15 @@ string TACAttr::str()
 {
   stringstream ss;
   
-  ss << *target << " <- " << *left;
+  ss << *target << " = ";
   
   if (op != 0)
   {
-    ss << " " << retrieve_operation_string(op) << " " << *right;
+    ss << retrieve_operation_string(op) << " " << *left << ", " << *right;
+  }
+  else
+  {
+    ss << *left;
   }
   
   return ss.str();
@@ -26,7 +30,7 @@ string Return::str()
 {
   stringstream ss;
   
-  ss << "ret ";
+  ss << "ret i32 ";
   
   if (value != NULL)
   {

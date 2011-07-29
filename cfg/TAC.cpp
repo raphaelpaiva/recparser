@@ -22,7 +22,7 @@ string TACVar::str()
 {
   stringstream ss;
   
-  ss << name << "_" << index;
+  ss << "%" << name << "." << index;
   
   return ss.str();
 }
@@ -31,16 +31,16 @@ string TACFuncall::str()
 {
   if (params.size() == 0)
   {
-    return name + "()";
+    return "call i32 " + name + "()";
   }
   
   stringstream ss;
   
-  ss << name << '(';
+  ss << "call i32 " << name << '(';
   
   for (vector<TACMember *>::iterator it = params.begin(); it != params.end(); ++it)
   {
-    ss << (*it)->str() << ", ";
+    ss << "i32 " << (*it)->str() << ", ";
   }
   
   string partial = ss.str();
