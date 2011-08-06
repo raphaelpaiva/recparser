@@ -35,9 +35,8 @@ class TACVar : public TACMember {
     string str();
 };
 
-class TACVarComparator {
-  public:
-    bool operator() (TACVar *v1, TACVar *v2) {
+struct TACVarComparator {
+    bool operator() (TACVar const *v1, TACVar const *v2) const {
       return v1->name < v2->name;
     }
 };

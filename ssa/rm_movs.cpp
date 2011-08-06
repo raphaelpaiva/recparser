@@ -1,5 +1,6 @@
 #include <string>
 #include <vector>
+#include <iostream>
 #include <map>
 #include "rm_movs.h"
 #include "../cfg/cfg.h"
@@ -28,11 +29,11 @@ vector<TACMember *> remove_move_funcall_params(vector<TACMember *> params, map<s
   return new_params;
 }
 
-bool remove_move_member(TACMember *member, map<string, TACMember *>& replace_operations)
+bool remove_move_member(TACMember **member, map<string, TACMember *>& replace_operations)
 {
   if (member != NULL)
   {
-    TACFuncall *funcall = dynamic_cast<TACFuncall *>(member);
+    TACFuncall *funcall = dynamic_cast<TACFuncall *>(*member);
   
     if (funcall != NULL)
     {
@@ -41,11 +42,11 @@ bool remove_move_member(TACMember *member, map<string, TACMember *>& replace_ope
     else
     {
       map<string, TACMember *>::iterator entry;
-      entry = replace_operations.find(member->str());
+      entry = replace_operations.find((*member)->str());
       
       if (entry != replace_operations.end())
       {
-        member = (*entry).second;
+        *member = (*entry).second;
         return true;
       }
     }
@@ -79,7 +80,7 @@ bool remove_move_attr_operation(Operation *op, map<string, TACMember *>& replace
     {
       string target_name = attr->target->str();
     
-      if (remove_move_member(attr->left, replace_operations))
+      if (remove_move_member(&(attr->left), replace_operations))
       {
         remove_operation = remove_move_attr_operation(op, replace_operations);
       }
@@ -96,9 +97,9 @@ bool remove_move_attr_operation(Operation *op, map<string, TACMember *>& replace
     }
     else
     {
-      remove_move_member(attr->left, replace_operations);
+      remove_move_member(&(attr->left), replace_operations);
       
-      remove_move_member(attr->right, replace_operations);
+      remove_move_member(&(attr->right), replace_operations);
     }
   }
   
@@ -112,7 +113,7 @@ bool remove_move_return_operation(Operation *op, map<string, TACMember *>& repla
   
   if (ret != NULL)
   {
-    remove_move_member(ret->value, replace_operations);
+    remove_move_member(&(ret->value), replace_operations);
   }
 }
 
@@ -134,7 +135,7 @@ void remove_move_branch_operation(Operation *op, map<string, TACMember *>& repla
 
 void remove_phi_operations(BasicBlock *block, map<string, TACMember *>& replace_operations)
 {
-  map<TACVar *, vector< pair<TACMember *, BasicBlock *> > > new_phis;
+  map<TACVar *, vector< pair<TACMember *, BasicBlock *> >, TACVarComparator > new_phis;
   
   for (vector<BasicBlock *>::iterator succ = block->succs.begin(); succ != block->succs.end(); ++succ)
   {
@@ -170,17 +171,12 @@ void remove_phi_operations(BasicBlock *block, map<string, TACMember *>& replace_
 
 }
 
-void remove_move_operations(CFG *cfg)
-{
-  map<string, TACMember *> replace_operations;
-  
-  for (vector<BasicBlock *>::iterator block = cfg->blocks.begin(); block != cfg->blocks.end(); ++block)
-  {
-    for (vector<Operation *>::iterator op = (*block)->ops.begin(); op != (*block)->ops.end();)
+void remove_move_operation(BasicBlock *block, map<string, TACMember *> &replace_operations) {
+    for (vector<Operation *>::iterator op = block->ops.begin(); op != block->ops.end();)
     {
       if (remove_move_attr_operation(*op, replace_operations))
       {
-        (*block)->ops.erase(op);
+        block->ops.erase(op);
         continue;
       }
       
@@ -191,7 +187,17 @@ void remove_move_operations(CFG *cfg)
       ++op;
     }
     
-    remove_phi_operations(*block, replace_operations);
-  }
+    remove_phi_operations(block, replace_operations);
+
+    for(vector<BasicBlock *>::iterator child = block->children.begin(); child != block->children.end(); ++child)
+    {
+      remove_move_operation(*child, replace_operations);
+    }
+}
+
+void remove_move_operations(CFG *cfg)
+{
+  map<string, TACMember *> replace_operations;
+  remove_move_operation(cfg->blocks[0], replace_operations);
 }
 
